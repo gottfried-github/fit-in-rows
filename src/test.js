@@ -1,4 +1,5 @@
 const {doRecursivelyIterate, makeRecursivelyIterate} = require('recursion-and-discrete-math')
+const {analyze} = require('./sophos-grid')
 
 function binaryPermutations(l) {
   const p = []
@@ -8,7 +9,7 @@ function binaryPermutations(l) {
     cb((v) ? [data].concat(v) : [data])
   })
 
-  rIterator([0,1], l, true, (v) => {p.push(v); console.log(v)}, rIterator)
+  rIterator([0,1], l, null, (v) => {p.push(v)}, rIterator)
 
   // console.log(p);
   return p
@@ -20,6 +21,16 @@ function demoBinaryPermutations() {
   return p
 }
 
+function analyzeSequences() {
+  const p = binaryPermutations(17)
+  return p.map(p => {
+    const r = analyze(p)
+    console.log(r)
+    return r
+  })
+}
+
 module.exports = {
-  binaryPermutations, demoBinaryPermutations
+  analyzeSequences,
+  binaryPermutations, demoBinaryPermutations,
 }
