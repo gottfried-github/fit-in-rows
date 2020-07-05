@@ -1,0 +1,10 @@
+{
+  "name": "sophos-grid",
+  "version": "0.0.1",
+  "main": "src/sohos-grid.js",
+  "repository": "/",
+  "author": "spti <dannvx@gmail.com>",
+  "license": "MIT",
+  "private": false,
+  "description": "lay pictures out such that theres no unfufilled terminal rows"
+}
