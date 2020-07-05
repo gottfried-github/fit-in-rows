@@ -1,13 +1,38 @@
 /**
-  @param {[0 || 1, ...]} seq
+  @param {[0 || 1, ...]} arr
 */
-function calculate(seq) { // calculateRatio
-  let w = 0, n = 0
-  seq.forEach(i => (i === 1)
-    ? w++ : n++
-  )
+function makeSeq(arr) {
+  return new Proxy(arr, {
+    get(t, p, r) {
+      if ("w" === p) {
+        let w = 0
+        t.forEach(i => {if (i === 1) {w++}})
+        return w
+      } else if ("n" === p) {
+        let n = 0
+        t.forEach(i => {if (i === 0) {n++}})
+        return n
+      } else if ("ratio" === p) {
+        return r.n / r.w
+      } else if ('splice' === p) {
+        // @param {{v: (the value of what to pass to splice)} || null (if not to pass anything)} items
+        return (start, n, items) => {
+          return (items)
+            ? makeSeq(t.splice(start, n, items.v))
+            : makeSeq(t.splice(start, n))
+          }
+      } else {
+        return t[p]
+      }
+    }, set() {}
+  })
+}
 
-  return {w, n}
+function iterate(seq) {
+  let [subseq0, subseq1] = [seq, seq.splice(0, Math.round(seq.length/2))]
+
+  
+  return {subseq0, subseq1}
 }
 
 /**
@@ -22,12 +47,25 @@ function analyze(seq) {
   }
 }
 
+/*
+  @param {[0 || 1, ...]} seq
+function calculate(seq) { // calculateRatio
+  let w = 0, n = 0
+  seq.forEach(i => (i === 1)
+    ? w++ : n++
+  )
+
+  return {w, n}
+}
+
 function analyzeSubseq(seq) {
   const res = calculate(seq)
   res.ratio = res.w / res.n
   return res
 }
+*/
 
 module.exports = {
-  calculate, analyze
+  // calculate, analyze,
+  makeSeq, iterate
 }
