@@ -15,7 +15,7 @@ function makeSeq(arr) {
       } else if ("ratio" === p) {
         return r.n / r.w
       } else if ('ratioMax' === p) {
-        return (t.length-1) / 1 
+        return (t.length-1) / 1
       } else if ('ratioMin' === p) {
         return 1 / (t.length-1)
       } else if ('splice' === p) {
@@ -92,7 +92,52 @@ function analyzeSubseq(seq) {
 }
 */
 
+function maximizeGroupsDifference(seq) {
+  return seq.reduce((groups, v) => {
+    if (groups.length === 1 && groups[groups.length-1].length === 0) {
+      groups[groups.length-1].push(v)
+      return groups
+    }
+
+    const lastGroup = groups[groups.length-1]
+    const lastItem = lastGroup[lastGroup.length-1]
+    const secondToLastItem = lastGroup[lastGroup.length-1]
+
+    // v === lastItem && secondToLastItem === undefined
+
+    if (
+      v === lastItem && secondToLastItem === lastItem ||
+      v !== lastItem && secondToLastItem !== lastItem
+    ) {lastGroup.push(v)} else if (
+      v === lastItem && secondToLastItem !== lastItem
+    ) {groups.push([lastGroup.pop(), v])} else if (
+      v !== lastItem && secondToLastItem === lastItem
+    ) {groups.push([v])}
+
+    return groups
+    /*
+    if (pushToLast) {lastGroup.push(v)}
+
+    if (v === lastItem) {
+      if (secondToLastItem === lastItem) {
+        lastGroup.push(v)
+      } else {
+        groups.push([lastGroup.pop(), v])
+      }
+    } else {
+      if (secondToLastItem !== lastItem) {
+        lastGroup.push(v)
+      } else {
+        groups.push([v])
+      }
+    }
+    */
+
+  }, [[]])
+}
+
 module.exports = {
   // calculate, analyze,
-  makeSeq, iterate, doIterate
+  makeSeq, iterate, doIterate,
+  maximizeGroupsDifference
 }
