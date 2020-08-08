@@ -32,6 +32,14 @@ function makeSeq(arr) {
   })
 }
 
+function splitIntoChunks() {
+
+}
+
+function scan(seq) {
+
+}
+
 /**
   @param {Number} step in terms of a fraction of the length of the seq, by which
   to calibrate the cut of the sequence, based on compared ratios of narrow items to wide, in the two parts
