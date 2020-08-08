@@ -6,5 +6,8 @@
   "author": "spti <dannvx@gmail.com>",
   "license": "MIT",
   "private": false,
-  "description": "lay pictures out such that theres no unfufilled terminal rows"
+  "description": "lay pictures out such that theres no unfufilled terminal rows",
+  "localDependencies": {
+    "recursion-and-discrete-math": "^0.0.2"
+  }
 }
