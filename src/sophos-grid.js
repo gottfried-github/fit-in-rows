@@ -14,6 +14,10 @@ function makeSeq(arr) {
         return n
       } else if ("ratio" === p) {
         return r.n / r.w
+      } else if ('ratioMax' === p) {
+        return (t.length-1) / 1 
+      } else if ('ratioMin' === p) {
+        return 1 / (t.length-1)
       } else if ('splice' === p) {
         // @param {{v: (the value of what to pass to splice)} || null (if not to pass anything)} items
         return (start, n, items) => {
