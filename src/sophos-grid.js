@@ -100,39 +100,21 @@ function maximizeGroupsDifference(seq) {
     }
 
     const lastGroup = groups[groups.length-1]
-    const lastItem = lastGroup[lastGroup.length-1]
-    const secondToLastItem = lastGroup[lastGroup.length-1]
+    const last = lastGroup[lastGroup.length-1]
+    const secondToLast = lastGroup[lastGroup.length-2]
 
-    // v === lastItem && secondToLastItem === undefined
-
-    if (
-      v === lastItem && secondToLastItem === lastItem ||
-      v !== lastItem && secondToLastItem !== lastItem
+    if (secondToLast === undefined ||
+      v === last && secondToLast === last ||
+      v !== last && secondToLast !== last
     ) {lastGroup.push(v)} else if (
-      v === lastItem && secondToLastItem !== lastItem
+      v === last && secondToLast !== last
     ) {groups.push([lastGroup.pop(), v])} else if (
-      v !== lastItem && secondToLastItem === lastItem
-    ) {groups.push([v])}
+      v !== last && secondToLast === last
+    ) {
+      groups.push([v])
+    }
 
     return groups
-    /*
-    if (pushToLast) {lastGroup.push(v)}
-
-    if (v === lastItem) {
-      if (secondToLastItem === lastItem) {
-        lastGroup.push(v)
-      } else {
-        groups.push([lastGroup.pop(), v])
-      }
-    } else {
-      if (secondToLastItem !== lastItem) {
-        lastGroup.push(v)
-      } else {
-        groups.push([v])
-      }
-    }
-    */
-
   }, [[]])
 }
 
