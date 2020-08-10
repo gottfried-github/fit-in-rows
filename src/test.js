@@ -1,25 +1,30 @@
-const {doRecursivelyIterate, makeRecursivelyIterate} = require('recursion-and-discrete-math')
-const {randomBinarySequence, randomBinarySequences, compare} = require('./helpers')
-const {iterate, doIterate, makeSeq} = require('./sophos-grid')
+// const {doRecursivelyIterate, makeRecursivelyIterate} = require('recursion-and-discrete-math')
+const {
+  randomBinarySequence, randomBinarySequences, compare,
+  binaryPermutations, demoBinaryPermutations
+} = require('./helpers')
+const {
+  maximizeGroupsDifference, fit,
+  iterate, doIterate, makeSeq
+} = require('./sophos-grid')
 
-function binaryPermutations(l) {
-  const p = []
-
-  const rIterator = makeRecursivelyIterate((v, data, depth, cb) => {
-    // console.log('v: ', v, 'data: ', data, 'depth: ', depth)
-    cb((v) ? [data].concat(v) : [data])
-  })
-
-  rIterator([0,1], l, null, (v) => {p.push(v)}, rIterator)
-
-  // console.log(p);
-  return p
+const layouts = {
+  l: {}, m: {
+    n: {min: 3, max: 5},
+    w: {min: 1, max: 3}
+  }, s: {}
 }
 
-function demoBinaryPermutations() {
-  const p = binaryPermutations(9)
-  console.log(p)
-  return p
+function createAndFitIntoM() {
+  const s = randomBinaryProportionateSeq(30, 20)
+  const sG = maximizeGroupsDifference(s)
+  const fitted = fit({n: 3, w: 1}, {n: 5, w: 3}, sG)
+
+  
+}
+
+function fitGroupsIntoM(groups) {
+
 }
 
 function analyzeSequences() {
@@ -40,6 +45,10 @@ function iterateSequences(sequences) {
 
 function iterateRandomSequences() {
   return iterateSequences(randomBinarySequences(64, 100))
+}
+
+function maximizeGroupsDifferenceRandomSeqs() {
+  // randomBinarySequence()
 }
 
 module.exports = {

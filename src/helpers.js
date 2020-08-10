@@ -1,3 +1,18 @@
+const {doRecursivelyIterate, makeRecursivelyIterate} = require('recursion-and-discrete-math')
+
+function randomBinaryProportionateSeq(n, w) {
+  const sN = []; sN.length = n; sN.fill(0)
+  const sW = []; sW.length = w; sW.fill(1)
+  const _s = sN.concat(sW);
+  const s = []
+
+  while (_s.length > 0) {
+    s.push(_s.splice(randomBetween(0, _s.length-1), 1)[0])
+  }
+
+  return s
+}
+
 function randomBinarySequence(l) {
   const arr = []
   while (l >= 0) {
@@ -61,10 +76,36 @@ function randomBinarySequences(l, n) {
   return sequences
 }
 
+function randomBetween(min, max) {
+  return Math.random() * (max - min) + min;
+}
+
 function logPretty(sequence) {
   return sequence.toString()
 }
 
+function binaryPermutations(l) {
+  const p = []
+
+  const rIterator = makeRecursivelyIterate((v, data, depth, cb) => {
+    // console.log('v: ', v, 'data: ', data, 'depth: ', depth)
+    cb((v) ? [data].concat(v) : [data])
+  })
+
+  rIterator([0,1], l, null, (v) => {p.push(v)}, rIterator)
+
+  // console.log(p);
+  return p
+}
+
+function demoBinaryPermutations() {
+  const p = binaryPermutations(9)
+  console.log(p)
+  return p
+}
+
 module.exports = {
-  randomBinarySequence, randomBinarySequences, compare, logPretty
+  randomBinarySequence, randomBinarySequences, randomBinaryProportionateSeq,
+  binaryPermutations, demoBinaryPermutations,
+  compare, logPretty
 }

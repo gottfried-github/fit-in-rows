@@ -1,3 +1,122 @@
+function maximizeGroupsDifference(seq) {
+  return seq.reduce((groups, v) => {
+    if (groups.length === 1 && groups[groups.length-1].length === 0) {
+      groups[groups.length-1].push(v)
+      return groups
+    }
+
+    const lastGroup = groups[groups.length-1]
+    const last = lastGroup[lastGroup.length-1]
+    const secondToLast = lastGroup[lastGroup.length-2]
+
+    if (secondToLast === undefined ||
+      v === last && secondToLast === last ||
+      v !== last && secondToLast !== last
+    ) {lastGroup.push(v)} else if (
+      v === last && secondToLast !== last
+    ) {groups.push([lastGroup.pop(), v])} else if (
+      v !== last && secondToLast === last
+    ) {
+      groups.push([v])
+    }
+
+    return groups
+  }, [[]])
+}
+
+function fit(min, max, groups) {
+  return groups.map((g) => {
+    return {
+      min: describeGroup(min, g),
+      max: describeGroup(max, g),
+      items: g
+    }
+  }).map(desc => {
+    const {min, max, items} = desc
+
+    return {
+      minLeftover: min.leftover, minShortage: min.shortage,
+      maxLeftover: max.leftover, maxShortage: max.shortage,
+      items, count: min.count
+    }
+  })
+}
+
+
+function describeGroup(rowLength, g) {
+  const {n, w} = countItems(g)
+  const leftover = {
+    n: (n < rowLength.n)
+      ? n - rowLength.n
+      : n % rowLength.n,
+    w: (w < rowLength.w)
+      ? w - rowLength.w
+      : w % rowLength.w
+  }
+
+  const shortage = {
+    n: (leftover.n <= 0)
+      ? Math.abs(leftover.n)
+      : rowLength.n - leftover.n,
+    w: (leftover.w <= 0)
+      ? Math.abs(leftover.w)
+      : rowLength.w - leftover.w
+  }
+
+  return {leftover, shortage, count: {n, w}}
+}
+
+function countItems(sequence) {
+  return sequence.reduce((itemsCount, i) => {
+    if (i === 0) { itemsCount.n++ }
+    else if (i === 1) { itemsCount.w++ }
+    else { throw new Error("i must be either 0 or 1")}
+
+    return itemsCount
+  }, {n: 0, w: 0})
+}
+
+/**
+  @param {n: Int, w: Int} min number of items of each type, allowed in a row
+  @param {n: Int, w: Int} max
+
+  function fit(min, max, groups) {
+    return groups.map((g) => {
+      const {nCount, wCount} = countItems(g)
+      const leftover = {
+        n: (nCount < min.n)
+          ? nCount - min.n
+          : nCount % min.n,
+        w: (wCount < min.w)
+          ? wCount - min.w
+          : wCount % min.w
+      }
+
+      const shortage = {
+        n: (nCount < min.n)
+          ? min.n - nCount
+          : nCount % min.n,
+        w: (wCount < min.w)
+          ? wCount - min.w
+          : wCount % min.w
+      }
+
+      return {
+        items: g, itemsCount,
+        minModulo: {
+          n: (itemsCount.n === 0) ? 0 : min.n % itemsCount.n,
+          w: (itemsCount.w === 0) ? 0 : min.w % itemsCount.w,
+        },
+        maxModulo: {
+          n: (itemsCount.n === 0) ? 0 : max.n % itemsCount.n,
+          w: (itemsCount.w === 0) ? 0 : max.w % itemsCount.w,
+        }, min, max
+      }
+    })
+  }
+*/
+
+
 /**
   @param {[0 || 1, ...]} arr
 */
@@ -92,34 +211,9 @@ function analyzeSubseq(seq) {
 }
 */
 
-function maximizeGroupsDifference(seq) {
-  return seq.reduce((groups, v) => {
-    if (groups.length === 1 && groups[groups.length-1].length === 0) {
-      groups[groups.length-1].push(v)
-      return groups
-    }
-
-    const lastGroup = groups[groups.length-1]
-    const last = lastGroup[lastGroup.length-1]
-    const secondToLast = lastGroup[lastGroup.length-2]
-
-    if (secondToLast === undefined ||
-      v === last && secondToLast === last ||
-      v !== last && secondToLast !== last
-    ) {lastGroup.push(v)} else if (
-      v === last && secondToLast !== last
-    ) {groups.push([lastGroup.pop(), v])} else if (
-      v !== last && secondToLast === last
-    ) {
-      groups.push([v])
-    }
-
-    return groups
-  }, [[]])
-}
-
 module.exports = {
   // calculate, analyze,
   makeSeq, iterate, doIterate,
-  maximizeGroupsDifference
+  maximizeGroupsDifference, fit,
+  describeGroup, countItems
 }
