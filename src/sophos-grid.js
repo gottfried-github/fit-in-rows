@@ -243,6 +243,18 @@ function countItems(sequence) {
 }
 
 /**
+  @param {Array} g a group, produced by maximizeGroupsDifference
+*/
+function isDenseGroup(g) {
+  if (g.length <= 1) return null
+
+  return (g.length <= 1)
+    ? null
+    : (g[0] === g[1]) ? true
+    : false
+}
+
+/**
   @param {n: Int, w: Int} min number of items of each type, allowed in a row
   @param {n: Int, w: Int} max
 
