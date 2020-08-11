@@ -13,6 +13,12 @@ function randomBinaryProportionateSeq(n, w) {
   return s
 }
 
+function randomBinaryProportionateSeqSecond(n, w, nSpace, wSpace) {
+  return randomBinaryProportionateSeq(n, w).map((i) => {
+    return {space: (n === 0) ? nSpace : wSpace}
+  })
+}
+
 function randomBinarySequence(l) {
   const arr = []
   while (l >= 0) {
@@ -106,6 +112,7 @@ function demoBinaryPermutations() {
 
 module.exports = {
   randomBinarySequence, randomBinarySequences, randomBinaryProportionateSeq,
+  randomBinaryProportionateSeqSecond,
   binaryPermutations, demoBinaryPermutations,
   compare, logPretty
 }

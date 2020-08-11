@@ -1,27 +1,189 @@
-function maximizeGroupsDifference(seq) {
-  return seq.reduce((groups, v) => {
-    if (groups.length === 1 && groups[groups.length-1].length === 0) {
-      groups[groups.length-1].push(v)
-      return groups
+
+/**
+  @type {Item} [{
+    space: Int, groups: [ref to group (for example, a Variant)]
+  }]
+  @type {Variants} {variants: [Variants]}
+  @type {{compatiblePredecessors: [Variants[i], ...], sequence: [Item, ...]}} Variant
+  @type {Variant} {
+    compatiblePredecessors: [PredescessorRef, ...],
+    sequence: [Item, ...]
+  }
+  @type {PredescessorRef} {
+    index: predescessor.variants[i],
+    way:
+      "add" ||
+      "substract" ||
+      "neglect" (special case of substract) ||
+      "asIs"
+    }
+*/
+class Variant {
+  constructor(items, compatiblePredecessors) {
+    this.items = items || []
+    this.compatiblePredecessors = compatiblePredecessors || []
+  }
+}
+
+/*
+const Ways = new Set([
+  "add",
+  "substract",
+  "neglect",
+  "asIs",
+])
+
+class VariantRef {
+  constructor(index, way) {
+    if ("number" === typeof(index)) this.index = index
+    if (undefined !== way && Ways.has(way)) {this.way = way} else {
+      // throw new Error()
+    }
+  }
+}
+*/
+
+/**
+@param {[{slots: Int}, ...]} rowStructure where slots defines how many slots a row contains
+@param {[{space: Int}]} g where space is how many slots the item takes
+@param {[{space: 1 || 2}]} g where space is how many slots the item takes
+*/
+function secondDesc(rowStructure, sequence) {
+  // const narrowItemsTopology = g.reduce(
+  //   (topology, v, i) => {if (v === 0) topology.push(i)},
+  // [])
+  // const wideItemsTopology = g.reduce(
+  //   (topology, v, i) => {if (v === 1) topology.push(i)},
+  // [])
+
+  const topology = sortItemsBySpace(sequence)
+
+  check(3, topology.get(1), sequence)
+}
+
+function check(slots, topology, g) {
+  const subGroups = []
+
+  topology.forEach((originI) => {
+    const item = g[originI]
+    let spaceToFill = slots - item.space
+    if (spaceToFill === 0) {
+      subGroups.push([item]); return
     }
 
-    const lastGroup = groups[groups.length-1]
-    const last = lastGroup[lastGroup.length-1]
-    const secondToLast = lastGroup[lastGroup.length-2]
+    let nextNeighborI = originI,
+    checkedBefore = false, checkedAfter = false,
+    lastNeighborSpace = null
 
-    if (secondToLast === undefined ||
-      v === last && secondToLast === last ||
-      v !== last && secondToLast !== last
-    ) {lastGroup.push(v)} else if (
-      v === last && secondToLast !== last
-    ) {groups.push([lastGroup.pop(), v])} else if (
-      v !== last && secondToLast === last
-    ) {
-      groups.push([v])
+    const subG = new Variant()
+    while (spaceToFill > 0) {
+      if (nextNeighborI === originI) { // which it is in the start of the loop
+        subgroup.items.push(originI)
+        lastNeighborSpace = g[originI].space
+        nextNeighborI++
+      } else {
+        const space = g[nextNeighborI].space
+        if (space === lastNeighborSpace) {
+          if (nextNeighborI > originI) {
+            subG.push(nextNeighborI)
+            nextNeighborI++; lastNeighborSpace = space
+
+            checkedAfter = true
+            spaceToFill--
+          } else { // if nextNeighborI < originI
+            subG.unshift(nextNeighborI)
+            nextNeighborI--; lastNeighborSpace = space
+
+            checkedBefore = true
+            spaceToFill--
+          }
+        } else {
+          if (nextNeighborI > originI && !checkedBefore) {
+            nextNeighborI = originI-1
+          } else if (nextNeighborI < originI && !checkedAfter) {
+            nextNeighborI = originI+1
+          } else {
+            break
+          }
+        }
+      }
     }
 
-    return groups
-  }, [[]])
+    /*
+    let lastNeighborI = originI,
+    checkedBefore = false, checkedAfter = false
+
+    const subgroup = new Variant()
+    while (spaceToFill > 0) {
+      if (lastNeighborI === originI) { // which it is in the start of the loop
+        if (g[lastNeighborI+1].space === item.space) {
+          lastNeighborI++
+          subgroup.items.push(item, g[i])
+
+          spaceToFill--; checkedAfter = true
+        } else if (g[lastNeighborI-1].space === item.space) {
+          lastNeighborI--
+          subgroup.items.push(g[lastNeighborI], item)
+
+          spaceToFill--; checkedBefore = true
+        }
+      } else if (lastNeighborI > originI) {
+        if (g[lastNeighborI+1].space === item.space) {
+          lastNeighborI++
+          subgroup.items.push(g[lastNeighborI])
+          spaceToFill--
+        } else {
+
+        }
+      } else if () {
+
+      }
+    }
+
+    let nextNeighborI = originI,
+    checkedBefore = false, checkedAfter = false
+
+    const subgroup = new Variant()
+    while (spaceToFill > 0) {
+      if (nextNeighborI === originI) { // which it is in the start of the loop
+        nextNeighborI++
+
+        // if (g[nextNeighborI-1].space === item.space) {
+        //   nextNeighborI--
+        //   subgroup.items.push(g[nextNeighborI], item)
+        //
+        //   spaceToFill--; checkedBefore = true
+        // }
+      } else if (nextNeighborI > originI) {
+        if (g[nextNeighborI+1].space === item.space) {
+          nextNeighborI++
+          subgroup.items.push(g[nextNeighborI])
+          spaceToFill--
+        } else {
+
+        }
+      } else if (lastNeighborI < originI) {
+
+      }
+    }
+    */
+  })
+
+  // if (space < slots) {
+  //
+  // }
+}
+
+function sortItemsBySpace(sequence) {
+  return sequence.reduce((topology, v, i) => {
+    if (topology.has(v.space)) {
+      topology.get(v.space).push(i)
+    } else {
+      topology.set(v.space, [i])
+    }
+
+    return topology
+  }, new Map())
 }
 
 function fit(min, max, groups) {
@@ -43,6 +205,10 @@ function fit(min, max, groups) {
 }
 
 
+
+/**
+  @param {Array} g a group, produced by maximizeGroupsDifference
+*/
 function describeGroup(rowLength, g) {
   const {n, w} = countItems(g)
   const leftover = {
@@ -116,6 +282,31 @@ function countItems(sequence) {
   }
 */
 
+function maximizeGroupsDifference(seq) {
+  return seq.reduce((groups, v) => {
+    if (groups.length === 1 && groups[groups.length-1].length === 0) {
+      groups[groups.length-1].push(v)
+      return groups
+    }
+
+    const lastGroup = groups[groups.length-1]
+    const last = lastGroup[lastGroup.length-1]
+    const secondToLast = lastGroup[lastGroup.length-2]
+
+    if (secondToLast === undefined ||
+      v === last && secondToLast === last ||
+      v !== last && secondToLast !== last
+    ) {lastGroup.push(v)} else if (
+      v === last && secondToLast !== last
+    ) {groups.push([lastGroup.pop(), v])} else if (
+      v !== last && secondToLast === last
+    ) {
+      groups.push([v])
+    }
+
+    return groups
+  }, [[]])
+}
 
 /**
   @param {[0 || 1, ...]} arr
