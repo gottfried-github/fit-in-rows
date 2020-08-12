@@ -87,7 +87,8 @@ class GroupsByItem {
 
   toArray() {
     const itemsArr = []
-    for ([k,v] of this.items.entries()) {
+    console.log(this.items)
+    for (var [k,v] of this.items.entries()) {
       // console.log(k,v)
       itemsArr.push({i: k, gs: v})
     }
@@ -96,6 +97,241 @@ class GroupsByItem {
   }
 }
 
+/**
+  @param {Array} s
+  @param {Object} i {origin: Int, next: Int}
+  @param {Array} g [index of the item in the s, ...]
+  @param {Object} checked {before: boolean, after: boolean}
+  @param {Object} l doLookAround
+  // s: a list of references to items in o,
+    representing a subset of items in the o,
+
+  function doLookAround(
+    i, iNext, spaceLeft,
+    checkedBefore, checkedAfter,
+    g, s, doLookAround
+  ) {
+    if (spaceLeft === 0) return g
+
+    if (nextI === i) { // which it is in the start of the loop
+      g.push(i)
+
+      if (i+1 <= s.length-1) {nextI = i+1; return doLookAround(
+        i, iNext, spaceLeft,
+        checkedBefore, checkedAfter,
+        g, s, doLookAround
+      )}
+      else if (i-1 < 0) {return g}
+      else {nextI = i-1; return}
+    }
+  }
+
+  function lookAround(sS, spaceToFill, s) {
+    const groupsByItem = new GroupsByItem()
+
+    sS.forEach((i) => {
+      groupsByItem.push(i, doLookAround(s, [], i, i, ))
+    })
+  }
+*/
+
+/*
+function check(slots, items, s) {
+  const groupsByItem = new GroupsByItem()
+
+  items.forEach((originI) => {
+    const item = s[originI]
+    let spaceToFill = slots - item.space
+    if (spaceToFill === 0) {
+      groupsByItem.push(originI, [originI]); return
+    }
+
+    let nextNeighborI = originI,
+    checkedBefore = false, checkedAfter = false
+
+    const g = []
+    while (spaceToFill > 0) {
+      if (nextNeighborI === originI) { // which it is in the start of the loop
+        g.push(originI)
+
+        if (originI+1 <= s.length-1) {
+          nextNeighborI = originI+1
+        } else if (originI-1 < 0) {break} else {
+          nextNeighborI = originI-1
+        }
+      } else {
+        const spaceDifference = spaceToFill - s[nextNeighborI].space
+
+        if (spaceDifference < 0) {
+          if (nextNeighborI > originI) {
+            checkedAfter = true
+            // if (checkedBefore || originI-1 < 0) break
+            if (checkedBefore) break
+            if (originI-1 < 0) {
+              // checkedBefore = true;
+              break
+            }
+
+            nextNeighborI = originI-1
+          } else {
+            checkedBefore = true
+            // if (checkedAfter || originI+1 > s.length-1) break
+            if (checkedAfter) break
+            if (originI+1 > s.length-1) {
+              // checkedAfter = true
+              break
+            }
+
+            nextNeighborI = originI+1
+          }
+        } else if (spaceDifference === 0) {
+          if (nextNeighborI > originI) {
+            g.push(nextNeighborI)
+          } else {
+            g.unshift(nextNeighborI)
+          }
+
+          break // or: spaceToFill = spaceDifference (which is 0)
+        } else {
+          if (nextNeighborI > originI) {
+            g.push(nextNeighborI)
+
+            if (nextNeighborI+1 > s.length-1) {
+              checkedAfter = true
+              if (checkedBefore) break
+              nextNeighborI = originI-1
+            } else {
+              nextNeighborI++;
+              spaceToFill = spaceDifference // checkedAfter = true;
+            }
+          } else { // if nextNeighborI < originI
+            g.unshift(nextNeighborI)
+
+            if (nextNeighborI-1 < 0) {
+              checkedBefore = true
+              if (checkedAfter) break
+              nextNeighborI = originI+1
+            } else {
+              nextNeighborI--;
+              checkedBefore = true; spaceToFill = spaceDifference
+            }
+          }
+        }
+      }
+    }
+
+    console.log(originI, g)
+    groupsByItem.push(originI, g)
+  })
+
+  return groupsByItem.toArray()
+}
+*/
+
+function formGroups(items, spaceToFill, sequence) {
+  const groupsByItem = new GroupsByItem()
+  items.forEach((i) => {
+    groupsByItem.push(i, formGroup(i, spaceToFill-sequence[i].space, sequence))
+  })
+
+  return groupsByItem.toArray(groupsByItem)
+}
+
+function formGroup(i, spaceLeft, s) {
+  let iNext = i,
+  checkedBefore = false, checkedAfter = false
+
+  const g = []
+  while (spaceLeft > 0) {
+    if (iNext === i) { // which it is in the start of the loop
+      g.push(i)
+
+      if (i+1 <= s.length-1) {
+        iNext = i+1
+      } else if (i-1 < 0) {break} else {
+        iNext = i-1
+      }
+    } else {
+      const spaceDifference = spaceLeft - s[iNext].space
+
+      if (spaceDifference < 0) {
+        if (iNext > i) {
+          checkedAfter = true
+          // if (checkedBefore || i-1 < 0) break
+          if (checkedBefore) break
+          if (i-1 < 0) {
+            // checkedBefore = true;
+            break
+          }
+
+          iNext = i-1
+        } else {
+          checkedBefore = true
+          // if (checkedAfter || i+1 > s.length-1) break
+          if (checkedAfter) break
+          if (i+1 > s.length-1) {
+            // checkedAfter = true
+            break
+          }
+
+          iNext = i+1
+        }
+      } else if (spaceDifference === 0) {
+        if (iNext > i) {
+          g.push(iNext)
+        } else {
+          g.unshift(iNext)
+        }
+
+        break // or: spaceLeft = spaceDifference (which is 0)
+      } else {
+        if (iNext > i) {
+          g.push(iNext)
+
+          if (iNext+1 > s.length-1) {
+            checkedAfter = true
+            if (checkedBefore) break
+            iNext = i-1
+          } else {
+            iNext++;
+            spaceLeft = spaceDifference // checkedAfter = true;
+          }
+        } else { // if iNext < i
+          g.unshift(iNext)
+
+          if (iNext-1 < 0) {
+            checkedBefore = true
+            if (checkedAfter) break
+            iNext = i+1
+          } else {
+            iNext--;
+            checkedBefore = true; spaceLeft = spaceDifference
+          }
+        }
+      }
+    }
+  }
+
+  return g
+}
+
+const {randomBinaryProportionateSeqSecond} = require('./helpers')
+function tryOutFormGroups(slots, n,w, nSpace,wSpace) {
+  const s = randomBinaryProportionateSeqSecond(n,w, nSpace,wSpace)
+  const sS = sortItemsBySpace(s).get(2)
+  const r = formGroups(sS, slots, s)
+
+  const sP = s.map(i => i.space)
+
+  const rM = []
+  r.forEach(r => rM[r.i] = r.gs[0].map(i => sP[i]))
+
+  const rP = []
+  rM.forEach(r => (r) ? rP.push(r) : null)
+
+  return {sP, rM}
+}
+/*
 function check(slots, items, s) {
   const groupsByItem = new GroupsByItem()
 
@@ -197,6 +433,7 @@ function check(slots, items, s) {
 
   return groupsByItem.toArray()
 }
+*/
 
 function sortItemsBySpace(sequence) {
   return sequence.reduce((topology, v, i) => {
@@ -442,7 +679,8 @@ module.exports = {
   // calculate, analyze,
   makeSeq, iterate, doIterate,
   maximizeGroupsDifference, fit,
-  secondDesc, sortItemsBySpace, check, Variant,
-  GroupsByItem,
+  secondDesc, sortItemsBySpace, Variant, // , check
+  GroupsByItem, formGroups, formGroup,
+  tryOutFormGroups,
   describeGroup, countItems
 }
