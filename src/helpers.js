@@ -15,7 +15,7 @@ function randomBinaryProportionateSeq(n, w) {
 
 function randomBinaryProportionateSeqSecond(n, w, nSpace, wSpace) {
   return randomBinaryProportionateSeq(n, w).map((i) => {
-    return {space: (n === 0) ? nSpace : wSpace}
+    return {space: (i === 0) ? nSpace : wSpace}
   })
 }
 
