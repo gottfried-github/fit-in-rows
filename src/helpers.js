@@ -13,9 +13,17 @@ function randomBinaryProportionateSeq(n, w) {
   return s
 }
 
+class Item {
+  constructor(space) {
+    if (!Number.isInteger(space) || space < 1) throw new Error("space must be an integer, greater than 0")
+    this.space = space
+  }
+}
+
 function randomBinaryProportionateSeqSecond(n, w, nSpace, wSpace) {
   return randomBinaryProportionateSeq(n, w).map((i) => {
-    return {space: (i === 0) ? nSpace : wSpace}
+    return new Item((i === 0) ? nSpace : wSpace)
+    // {space: (i === 0) ? nSpace : wSpace}
   })
 }
 

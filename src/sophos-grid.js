@@ -1,4 +1,3 @@
-
 /**
   @type {Item} [{
     space: Int, groups: [ref to group (for example, a Variant)]
@@ -84,6 +83,16 @@ class GroupsByItem {
     }
 
     // this.items.push(new ItemGroups(i, groups))
+  }
+
+  toArray() {
+    const itemsArr = []
+    for ([k,v] of this.items.entries()) {
+      // console.log(k,v)
+      itemsArr.push({i: k, gs: v})
+    }
+
+    return itemsArr
   }
 }
 
@@ -186,20 +195,7 @@ function check(slots, items, s) {
     groupsByItem.push(originI, g)
   })
 
-  const groupsByItemArr = []
-
-  for ([k,v] of groupsByItem.items.entries()) {
-    // console.log(k,v)
-    groupsByItemArr.push({i: k, gs: v})
-  }
-
-  return groupsByItemArr
-}
-
-
-  // if (space < slots) {
-  //
-  // }
+  return groupsByItem.toArray()
 }
 
 function sortItemsBySpace(sequence) {
@@ -447,6 +443,6 @@ module.exports = {
   makeSeq, iterate, doIterate,
   maximizeGroupsDifference, fit,
   secondDesc, sortItemsBySpace, check, Variant,
-  GroupsByItem, tryit,
+  GroupsByItem,
   describeGroup, countItems
 }
