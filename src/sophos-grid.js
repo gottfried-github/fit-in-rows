@@ -61,113 +61,141 @@ function secondDesc(rowStructure, sequence) {
   check(3, topology.get(1), sequence)
 }
 
-function check(slots, topology, g) {
-  const subGroups = []
 
-  topology.forEach((originI) => {
-    const item = g[originI]
+class ItemGroups {
+  constructor(i, groups) {
+    this.index = i
+    this.groups = groups || []
+  }
+
+  push(group) {this.groups.push(group)}
+}
+
+class GroupsByItem {
+  constructor() {
+    this.items = new Map()
+  }
+
+  push(i, ...groups) {
+    if (this.items.has(i)) {
+      this.items.get(i).push(...groups)
+    } else {
+      this.items.set(i, [...groups])
+    }
+
+    // this.items.push(new ItemGroups(i, groups))
+  }
+}
+
+function check(slots, items, s) {
+  const groupsByItem = new GroupsByItem()
+
+  items.forEach((originI) => {
+    const item = s[originI]
     let spaceToFill = slots - item.space
     if (spaceToFill === 0) {
-      subGroups.push([item]); return
+      groupsByItem.push(originI, [originI]); return
     }
 
     let nextNeighborI = originI,
-    checkedBefore = false, checkedAfter = false,
-    lastNeighborSpace = null
+    checkedBefore = false, checkedAfter = false
+    // lastNeighborSpace = null
 
-    const subG = new Variant()
+    const g = []
     while (spaceToFill > 0) {
       if (nextNeighborI === originI) { // which it is in the start of the loop
-        subgroup.items.push(originI)
-        lastNeighborSpace = g[originI].space
-        nextNeighborI++
+        g.push(originI)
+
+        if (originI+1 <= s.length-1) {
+          nextNeighborI = originI+1
+        } else if (originI-1 < 0) {break} else {
+          nextNeighborI = originI-1
+        }
       } else {
-        const space = g[nextNeighborI].space
-        if (space === lastNeighborSpace) {
+        const spaceDifference = spaceToFill - s[nextNeighborI].space
+
+        if (spaceDifference < 0) {
           if (nextNeighborI > originI) {
-            subG.push(nextNeighborI)
-            nextNeighborI++; lastNeighborSpace = space
-
             checkedAfter = true
-            spaceToFill--
-          } else { // if nextNeighborI < originI
-            subG.unshift(nextNeighborI)
-            nextNeighborI--; lastNeighborSpace = space
+            // if (checkedBefore || originI-1 < 0) break
+            if (checkedBefore) break
+            if (originI-1 < 0) {
+              // checkedBefore = true;
+              break
+            }
 
-            checkedBefore = true
-            spaceToFill--
-          }
-        } else {
-          if (nextNeighborI > originI && !checkedBefore) {
             nextNeighborI = originI-1
-          } else if (nextNeighborI < originI && !checkedAfter) {
-            nextNeighborI = originI+1
           } else {
-            break
+            checkedBefore = true
+            // if (checkedAfter || originI+1 > s.length-1) break
+            if (checkedAfter) break
+            if (originI+1 > s.length-1) {
+              // checkedAfter = true
+              break
+            }
+
+            nextNeighborI = originI+1
+          }
+
+          // if (nextNeighborI > originI && !checkedBefore) {
+            // if (originI-1 < 0) {break} else {
+            //   nextNeighborI = originI-1
+            // }
+          // } else if (nextNeighborI < originI && !checkedAfter) {
+            // nextNeighborI = originI+1
+          // } else {
+            // break
+          // }
+        } else if (spaceDifference === 0) {
+          if (nextNeighborI > originI) {
+            g.push(nextNeighborI)
+          } else {
+            g.unshift(nextNeighborI)
+          }
+
+          break // or: spaceToFill = spaceDifference (which is 0)
+        } else {
+          if (nextNeighborI > originI) {
+            g.push(nextNeighborI)
+
+            if (nextNeighborI+1 > s.length-1) {
+              checkedAfter = true
+              if (checkedBefore) break
+              nextNeighborI = originI-1
+            } else {
+              nextNeighborI++;
+              spaceToFill = spaceDifference // checkedAfter = true;
+            }
+          } else { // if nextNeighborI < originI
+            g.unshift(nextNeighborI)
+
+            if (nextNeighborI-1 < 0) {
+              checkedBefore = true
+              if (checkedAfter) break
+              nextNeighborI = originI+1
+            } else {
+              nextNeighborI--;
+              checkedBefore = true; spaceToFill = spaceDifference
+            }
           }
         }
       }
     }
 
-    /*
-    let lastNeighborI = originI,
-    checkedBefore = false, checkedAfter = false
-
-    const subgroup = new Variant()
-    while (spaceToFill > 0) {
-      if (lastNeighborI === originI) { // which it is in the start of the loop
-        if (g[lastNeighborI+1].space === item.space) {
-          lastNeighborI++
-          subgroup.items.push(item, g[i])
-
-          spaceToFill--; checkedAfter = true
-        } else if (g[lastNeighborI-1].space === item.space) {
-          lastNeighborI--
-          subgroup.items.push(g[lastNeighborI], item)
-
-          spaceToFill--; checkedBefore = true
-        }
-      } else if (lastNeighborI > originI) {
-        if (g[lastNeighborI+1].space === item.space) {
-          lastNeighborI++
-          subgroup.items.push(g[lastNeighborI])
-          spaceToFill--
-        } else {
-
-        }
-      } else if () {
-
-      }
-    }
-
-    let nextNeighborI = originI,
-    checkedBefore = false, checkedAfter = false
-
-    const subgroup = new Variant()
-    while (spaceToFill > 0) {
-      if (nextNeighborI === originI) { // which it is in the start of the loop
-        nextNeighborI++
-
-        // if (g[nextNeighborI-1].space === item.space) {
-        //   nextNeighborI--
-        //   subgroup.items.push(g[nextNeighborI], item)
-        //
-        //   spaceToFill--; checkedBefore = true
-        // }
-      } else if (nextNeighborI > originI) {
-        if (g[nextNeighborI+1].space === item.space) {
-          nextNeighborI++
-          subgroup.items.push(g[nextNeighborI])
-          spaceToFill--
-        } else {
-
-        }
-      } else if (lastNeighborI < originI) {
-
-      }
-    }
-    */
+    console.log(originI, g)
+    groupsByItem.push(originI, g)
   })
+
+  const groupsByItemArr = []
+
+  for ([k,v] of groupsByItem.items.entries()) {
+    // console.log(k,v)
+    groupsByItemArr.push({i: k, gs: v})
+  }
+
+  return groupsByItemArr
+}
+
 
   // if (space < slots) {
   //
@@ -418,5 +446,7 @@ module.exports = {
   // calculate, analyze,
   makeSeq, iterate, doIterate,
   maximizeGroupsDifference, fit,
+  secondDesc, sortItemsBySpace, check, Variant,
+  GroupsByItem, tryit,
   describeGroup, countItems
 }
