@@ -1,50 +1,3 @@
-/**
-  @type {Item} [{
-    space: Int, groups: [ref to group (for example, a Variant)]
-  }]
-  @type {Variants} {variants: [Variants]}
-  @type {{compatiblePredecessors: [Variants[i], ...], sequence: [Item, ...]}} Variant
-  @type {Variant} {
-    compatiblePredecessors: [PredescessorRef, ...],
-    sequence: [Item, ...]
-  }
-  @type {PredescessorRef} {
-    index: predescessor.variants[i],
-    way:
-      "add" ||
-      "substract" ||
-      "neglect" (special case of substract) ||
-      "asIs"
-  }
-
-  const Ways = new Set([
-    "add",
-    "substract",
-    "neglect",
-    "asIs",
-  ])
-
-  class VariantRef {
-    constructor(index, way) {
-      if ("number" === typeof(index)) this.index = index
-      if (undefined !== way && Ways.has(way)) {this.way = way} else {
-        // throw new Error()
-      }
-    }
-  }
-
-  @param {[{slots: Int}, ...]} rowStructure where slots defines how many slots a row contains
-  @param {[{space: Int}]} g where space is how many slots the item takes
-  @param {[{space: 1 || 2}]} g where space is how many slots the item takes
-*/
-
-class Variant {
-  constructor(items, compatiblePredecessors) {
-    this.items = items || []
-    this.compatiblePredecessors = compatiblePredecessors || []
-  }
-}
-
 class GroupsByItem {
   constructor() {
     this.items = new Map()
@@ -72,6 +25,13 @@ class GroupsByItem {
   }
 }
 
+class Variant {
+  constructor(items, compatiblePredecessors) {
+    this.items = items || []
+    this.compatiblePredecessors = compatiblePredecessors || []
+  }
+}
+
 class UniDirectionalList {
   constructor(fwd, items) {
     if ('boolean' !== typeof(fwd)) throw new Error('fwd must be a boolean')
@@ -88,24 +48,24 @@ class UniDirectionalList {
 }
 
 class Delta {
-  constructor(d) {
-    if (undefined !== d) this.d = d
+  constructor(v) {
+    if (undefined !== v) this.v = v
   }
 
-  set d(d) {
-    if ("number" !== typeof(d) || !Number.isInteger(d) || 0 === d)
+  set v(v) {
+    if ("number" !== typeof(v) || !Number.isInteger(v) || 0 === v)
       throw new Error("delta must be an integer, greater or less than 0")
 
-    this._d = d
+    this._v = v
   }
 
-  get d() {
-    return this._d
+  get v() {
+    return this._v
   }
 
   increment() {
-    (this.d > 0) ? this.d++ : this.d--
-    return this.d
+    (this.v > 0) ? this.v++ : this.v--
+    return this.v
   }
 }
 
@@ -126,19 +86,24 @@ function formGroup(space, i, s) {
   } else if (space < 0)
   {const g = []; g.reached = true}
 
+  let g = new UniDirectionalList(true, [i])
+  g.spaceLeft = space
 
-  let g = doFormGroup(
-    new Delta(1), space, i, s, new UniDirectionalList(true, [i])
+  g = doFormGroup(
+    new Delta(1), space, i, s, g
   )
 
+  console.log("formGroup, didFormGroupIncremental", g)
   if (g.spaceLeft === 0) return g
 
   if (g.reached) {
     // g.reachedOpposite = g.reached; g.reached = false
 
+    const _g = new UniDirectionalList(false, g.items)
+    _g.spaceLeft = g.spaceLeft
     g = doFormGroup(
-      new Delta(-1), g.spaceLeft, i, s,
-      new UniDirectionalList(false, g.items)
+      new Delta(-1), g.spaceLeft, i, s, _g
+
     )
   }
 
@@ -146,88 +111,129 @@ function formGroup(space, i, s) {
 }
 
 function doFormGroup(d, spaceLeft, i, s, g) {
-  if (i+d.d > s.length-1 || i+d.d < 0) {
+  if (i+d.v > s.length-1 || i+d.v < 0) {
     g.reached = true;
     if (undefined === g.spaceLeft) g.spaceLeft = spaceLeft
     return g
   }
 
   if (spaceLeft < 0) {
-    g.reached = true; g.spaceLeft = spaceLeft + s[i+d.d].space
+    g.reached = true; g.spaceLeft = spaceLeft + s[i+d.v].space
     return g
   } else if (spaceLeft === 0) {
     return Object.assign(g, spaceLeft)
   } else {
-    g.add(i+d.d)
-    spaceLeft -= s[i+d.d].space
+    g.add(i+d.v)
+    spaceLeft -= s[i+d.v].space
     d.increment()
     return doFormGroup(d, spaceLeft, i, s, Object.assign(g, spaceLeft))
   }
 }
 
-function sortItemsBySpace(sequence) {
-  return sequence.reduce((topology, v, i) => {
-    if (topology.has(v.space)) {
-      topology.get(v.space).push(i)
-    } else {
-      topology.set(v.space, [i])
-    }
+/*
+Item { space: 1 },
+Item { space: 1 },
+Item { space: 1 },
+Item { space: 1 },
+Item { space: 1 },
+5: Item { space: 2 },
+Item { space: 1 },
+Item { space: 1 },
+8: Item { space: 2 },
+9: Item { space: 2 }
 
-    return topology
-  }, new Map())
-}
 
-function countItems(sequence) {
-  return sequence.reduce((itemsCount, i) => {
-    if (i === 0) { itemsCount.n++ }
-    else if (i === 1) { itemsCount.w++ }
-    else { throw new Error("i must be either 0 or 1")}
-
-    return itemsCount
-  }, {n: 0, w: 0})
-}
-
-/**
-  @param {Array} g a group, produced by maximizeGroupsDifference
+r:
+[5,6]
+[8,9]: spaceLeft - 0
+[8,9]: spaceLeft - 0
 */
-function isDenseGroup(g) {
-  if (g.length <= 1) return null
 
-  return (g.length <= 1)
-    ? null
-    : (g[0] === g[1]) ? true
-    : false
+/*
+function formGroup(space, i, s) {
+  const gAfter = doFormGroup(1, space, i, s, [])
+  console.log('formGroup, gAfter', gAfter)
+
+  if (gAfter.spaceLeft === 0) {
+    // gAfter.g.metFloor = false
+    // gAfter.g.metCeiling = !!gAfter.reached
+    return {
+      g: gAfter.g, spaceLeft: gAfter.spaceLeft,
+      reachedLowerLimit: false,
+      reachedUpperLimit: gAfter.reached
+    }
+  }
+
+  const gBefore = doFormGroup(-1, gAfter.spaceLeft, i, s, [])
+  console.log('formGroup, gBefore', gBefore)
+
+  return {
+    g: gBefore.concat(gAfter),
+    spaceLeft: gBefore.spaceLeft,
+    reachedUpperLimit: gAfter.reached,
+    reachedLowerLimit: gBefore.reached
+  }
 }
 
-function maximizeGroupsDifference(seq) {
-  return seq.reduce((groups, v) => {
-    if (groups.length === 1 && groups[groups.length-1].length === 0) {
-      groups[groups.length-1].push(v)
-      return groups
-    }
+function doFormGroup(d, spaceLeft, i, s, g) {
+  if (i+d > s.length-1 || i+d < 0) {
+    return {reached: true, spaceLeft, g}
+  }
 
-    const lastGroup = groups[groups.length-1]
-    const last = lastGroup[lastGroup.length-1]
-    const secondToLast = lastGroup[lastGroup.length-2]
+  const spaceLeftNew = spaceLeft - s[i+d].space
 
-    if (secondToLast === undefined ||
-      v === last && secondToLast === last ||
-      v !== last && secondToLast !== last
-    ) {lastGroup.push(v)} else if (
-      v === last && secondToLast !== last
-    ) {groups.push([lastGroup.pop(), v])} else if (
-      v !== last && secondToLast === last
-    ) {
-      groups.push([v])
-    }
+  if (spaceLeftNew > 0) {
+    (d > 0) ? g.push(i+d) : g.unshift(i+d)
+    (d > 0) ? d++ : d--
 
-    return groups
-  }, [[]])
+    return doFormGroup(d, spaceLeftNew, i, s, g)
+  } else if (spaceLeftNew < 0) {
+    return {reached: true, spaceLeft, g}
+  } else {
+    return {g, spaceLeftNew}
+  }
+
+  // if (spaceLeftNew === 0) {
+  //   return {g, spaceLeftNew}
+  // } else if (spaceLeftNew < 0) {
+  //   return {reached: true, spaceLeft, g}
+  // } else {
+  //   (d > 0) ? g.push(i+d) : g.unshift(i+d)
+  //   (d > 0) ? d++ : d--
+  //   return doFormGroup(d, spaceLeftNew, i, s, g)
+  // }
+
+  // if (spaceLeft === 0) {
+  //   return {g, spaceLeft}
+  // } else if (spaceLeft < 0) {
+  //   spaceLeft += spaceAdj
+  //   return {reached: true, spaceLeft, g}
+  // } else {
+  //   g.add(i+d.v)
+  //   d.increment()
+  //   return doFormGroup(d, spaceLeft, i, s, Object.assign(g, spaceLeft))
+  // }
 }
+
+function doFormGroup(d, spaceLeft, i, s, g) {
+  if (i+d.d > s.length-1 || i+d.d < 0) {
+    return {reached: true, spaceLeft, g}
+  }
+
+  if (spaceLeft < 0) {
+    return {reached: true, spaceLeft: spaceLeft + s[i+d.d].space, g}
+  } else if (spaceLeft === 0) {
+    return {g, spaceLeft}
+  } else {
+    g.add(i+d.d)
+    // spaceLeft -= s[i+d.d].space
+    d.increment()
+    return doFormGroup(d, spaceLeft, i, s, Object.assign(g, spaceLeft))
+  }
+}
+*/
 
 module.exports = {
   formGroup, doFormGroup, formGroups,
   GroupsByItem, Variant, UniDirectionalList, Delta,
-  maximizeGroupsDifference,
-  sortItemsBySpace, countItems,
 }
