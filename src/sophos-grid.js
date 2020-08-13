@@ -177,97 +177,6 @@ function sortItemsBySpace(sequence) {
   }, new Map())
 }
 
-function formGroupsLegacy(items, spaceToFill, sequence) {
-  const groupsByItem = new GroupsByItem()
-  items.forEach((i) => {
-    groupsByItem.push(i, formGroup(i, 1, spaceToFill, sequence))
-  })
-
-  return groupsByItem.toArray(groupsByItem)
-}
-
-function formGroupLegacy(i, spaceLeft, s) {
-  if (0 === spaceLeft - s[i].space) return [i]
-
-  const g = [i]
-  spaceLeft = spaceLeft - s[i].space
-
-  let iNext = i,
-  checkedBefore = false, checkedAfter = false
-
-  while (spaceLeft > 0) {
-    if (iNext === i) { // which it is in the start of the loop
-      g.push(i)
-
-      if (i+1 <= s.length-1) {
-        iNext = i+1
-      } else if (i-1 < 0) {break} else {
-        iNext = i-1
-      }
-    } else {
-      const spaceDifference = spaceLeft - s[iNext].space
-
-      if (spaceDifference < 0) {
-        if (iNext > i) {
-          checkedAfter = true
-          // if (checkedBefore || i-1 < 0) break
-          if (checkedBefore) break
-          if (i-1 < 0) {
-            // checkedBefore = true;
-            break
-          }
-
-          iNext = i-1
-        } else {
-          checkedBefore = true
-          // if (checkedAfter || i+1 > s.length-1) break
-          if (checkedAfter) break
-          if (i+1 > s.length-1) {
-            // checkedAfter = true
-            break
-          }
-
-          iNext = i+1
-        }
-      } else if (spaceDifference === 0) {
-        if (iNext > i) {
-          g.push(iNext)
-        } else {
-          g.unshift(iNext)
-        }
-
-        break // or: spaceLeft = spaceDifference (which is 0)
-      } else {
-        if (iNext > i) {
-          g.push(iNext)
-
-          if (iNext+1 > s.length-1) {
-            checkedAfter = true
-            if (checkedBefore) break
-            iNext = i-1
-          } else {
-            iNext++;
-            spaceLeft = spaceDifference // checkedAfter = true;
-          }
-        } else { // if iNext < i
-          g.unshift(iNext)
-
-          if (iNext-1 < 0) {
-            checkedBefore = true
-            if (checkedAfter) break
-            iNext = i+1
-          } else {
-            iNext--;
-            checkedBefore = true; spaceLeft = spaceDifference
-          }
-        }
-      }
-    }
-  }
-
-  return g
-}
-
 function countItems(sequence) {
   return sequence.reduce((itemsCount, i) => {
     if (i === 0) { itemsCount.n++ }
@@ -318,7 +227,6 @@ function maximizeGroupsDifference(seq) {
 
 module.exports = {
   formGroup, doFormGroup, formGroups,
-  formGroupsLegacy, formGroupLegacy,
   GroupsByItem, Variant, UniDirectionalList, Delta,
   maximizeGroupsDifference,
   sortItemsBySpace, countItems,
