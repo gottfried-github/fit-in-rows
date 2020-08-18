@@ -91,27 +91,6 @@ function doFormGroup(d, spaceLeft, i, s, g) {
   } else {
     return {reached: true, spaceLeft, g}
   }
-
-  // if (spaceLeftNew === 0) {
-  //   return {g, spaceLeftNew}
-  // } else if (spaceLeftNew < 0) {
-  //   return {reached: true, spaceLeft, g}
-  // } else {
-  //   (d > 0) ? g.push(i+d) : g.unshift(i+d)
-  //   (d > 0) ? d++ : d--
-  //   return doFormGroup(d, spaceLeftNew, i, s, g)
-  // }
-
-  // if (spaceLeft === 0) {
-  //   return {g, spaceLeft}
-  // } else if (spaceLeft < 0) {
-  //   spaceLeft += spaceAdj
-  //   return {reached: true, spaceLeft, g}
-  // } else {
-  //   g.add(i+d.v)
-  //   d.increment()
-  //   return doFormGroup(d, spaceLeft, i, s, Object.assign(g, spaceLeft))
-  // }
 }
 
 /*
@@ -162,5 +141,5 @@ class Delta {
 
 module.exports = {
   formGroup, doFormGroup, formGroups,
-  GroupsByItem, 
+  GroupsByItem,
 }
