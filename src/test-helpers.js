@@ -1,4 +1,5 @@
 const {doRecursivelyIterate, makeRecursivelyIterate} = require('recursion-and-discrete-math')
+const {sortItemsBySpace} = require('./helpers')
 
 function randomBinaryProportionateSeq(n, w) {
   const sN = []; sN.length = n; sN.fill(0)
@@ -25,6 +26,11 @@ function randomBinaryProportionateSeqSecond(n, w, nSpace, wSpace) {
     return new Item((i === 0) ? nSpace : wSpace)
     // {space: (i === 0) ? nSpace : wSpace}
   })
+}
+
+function randomPropSortedSeqSecond(n,w, nSpace,wSpace) {
+  const s = randomBinaryProportionateSeqSecond(n,w, nSpace,wSpace)
+  return {s, sS: sortItemsBySpace(s).get(wSpace)}
 }
 
 function randomBinarySequence(l) {
@@ -120,7 +126,7 @@ function demoBinaryPermutations() {
 
 module.exports = {
   randomBinarySequence, randomBinarySequences, randomBinaryProportionateSeq,
-  randomBinaryProportionateSeqSecond,
+  randomBinaryProportionateSeqSecond, randomPropSortedSeqSecond,
   binaryPermutations, demoBinaryPermutations,
   compare, logPretty
 }

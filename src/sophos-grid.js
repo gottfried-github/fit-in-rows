@@ -25,6 +25,96 @@ class GroupsByItem {
   }
 }
 
+function formGroups(space, s, items) {
+  const groupsByItem = new GroupsByItem()
+  items.forEach(i => {
+    groupsByItem.push(i, formGroup(space, i, s))
+  })
+
+  return groupsByItem.toArray()
+}
+
+function formGroup(space, i, s) {
+  space -= s[i].space
+
+  if (space <= 0) {
+    return {
+      g: [i], spaceLeft: space,
+      reachedLeftLimit: true, reachedRightLimit: true,
+    }
+  }
+
+  const gAfter = doFormGroup(1, space, i, s, [])
+  console.log('formGroup, gAfter', gAfter)
+
+  if (gAfter.spaceLeft === 0) {
+    // gAfter.g.metFloor = false
+    // gAfter.g.metCeiling = !!gAfter.reached
+    return {
+      g: [i].concat(gAfter.g),
+      spaceLeft: gAfter.spaceLeft,
+      reachedLeftLimit: false,
+      reachedRightLimit: !!gAfter.reached
+    }
+  }
+
+  const gBefore = doFormGroup(-1, gAfter.spaceLeft, i, s, [])
+  console.log('formGroup, gBefore', gBefore)
+
+  return {
+    g: gBefore.g.concat([i].concat(gAfter.g)),
+    spaceLeft: gBefore.spaceLeft,
+    reachedRightLimit: gAfter.reached,
+    reachedLeftLimit: gBefore.reached
+  }
+}
+
+function doFormGroup(d, spaceLeft, i, s, g) {
+  if (i+d > s.length-1 || i+d < 0) {
+    // console.log('doFormGroup, i+d > s.length-1 || i+d < 0');
+    return {reached: true, spaceLeft, g}
+  }
+
+  console.log('doFormGroup, d, spaceLeft, i', d, spaceLeft, i)
+  console.log('doFormGroup, i+d, s[i+d].space', i+d, s[i+d].space)
+  const spaceLeftNew = spaceLeft - s[i+d].space
+  // console.log('doFormGroup, spaceLeftNew', spaceLeftNew);
+
+  if (spaceLeftNew > 0) {
+    (d > 0) ? g.push(i+d) : g.unshift(i+d);
+    (d > 0) ? d++ : d--;
+
+    return doFormGroup(d, spaceLeftNew, i, s, g)
+  } else if (spaceLeftNew === 0) {
+    (d > 0) ? g.push(i+d) : g.unshift(i+d)
+    return {g, spaceLeft: spaceLeftNew}
+  } else {
+    return {reached: true, spaceLeft, g}
+  }
+
+  // if (spaceLeftNew === 0) {
+  //   return {g, spaceLeftNew}
+  // } else if (spaceLeftNew < 0) {
+  //   return {reached: true, spaceLeft, g}
+  // } else {
+  //   (d > 0) ? g.push(i+d) : g.unshift(i+d)
+  //   (d > 0) ? d++ : d--
+  //   return doFormGroup(d, spaceLeftNew, i, s, g)
+  // }
+
+  // if (spaceLeft === 0) {
+  //   return {g, spaceLeft}
+  // } else if (spaceLeft < 0) {
+  //   spaceLeft += spaceAdj
+  //   return {reached: true, spaceLeft, g}
+  // } else {
+  //   g.add(i+d.v)
+  //   d.increment()
+  //   return doFormGroup(d, spaceLeft, i, s, Object.assign(g, spaceLeft))
+  // }
+}
+
+/*
 class Variant {
   constructor(items, compatiblePredecessors) {
     this.items = items || []
@@ -68,172 +158,9 @@ class Delta {
     return this.v
   }
 }
-
-function formGroups(space, s, items) {
-  const groupsByItem = new GroupsByItem()
-  items.forEach(i => {
-    groupsByItem.push(i, formGroup(space, i, s))
-  })
-
-  return groupsByItem.toArray()
-}
-
-function formGroup(space, i, s) {
-  space -= s[i].space
-  if (space === 0) {
-    const g = [i]; g.spaceLeft = space
-    return g
-  } else if (space < 0)
-  {const g = []; g.reached = true}
-
-  let g = new UniDirectionalList(true, [i])
-  g.spaceLeft = space
-
-  g = doFormGroup(
-    new Delta(1), space, i, s, g
-  )
-
-  console.log("formGroup, didFormGroupIncremental", g)
-  if (g.spaceLeft === 0) return g
-
-  if (g.reached) {
-    // g.reachedOpposite = g.reached; g.reached = false
-
-    const _g = new UniDirectionalList(false, g.items)
-    _g.spaceLeft = g.spaceLeft
-    g = doFormGroup(
-      new Delta(-1), g.spaceLeft, i, s, _g
-
-    )
-  }
-
-  return g
-}
-
-function doFormGroup(d, spaceLeft, i, s, g) {
-  if (i+d.v > s.length-1 || i+d.v < 0) {
-    g.reached = true;
-    if (undefined === g.spaceLeft) g.spaceLeft = spaceLeft
-    return g
-  }
-
-  if (spaceLeft < 0) {
-    g.reached = true; g.spaceLeft = spaceLeft + s[i+d.v].space
-    return g
-  } else if (spaceLeft === 0) {
-    return Object.assign(g, spaceLeft)
-  } else {
-    g.add(i+d.v)
-    spaceLeft -= s[i+d.v].space
-    d.increment()
-    return doFormGroup(d, spaceLeft, i, s, Object.assign(g, spaceLeft))
-  }
-}
-
-/*
-Item { space: 1 },
-Item { space: 1 },
-Item { space: 1 },
-Item { space: 1 },
-Item { space: 1 },
-5: Item { space: 2 },
-Item { space: 1 },
-Item { space: 1 },
-8: Item { space: 2 },
-9: Item { space: 2 }
-
-
-r:
-[5,6]
-[8,9]: spaceLeft - 0
-[8,9]: spaceLeft - 0
-*/
-
-/*
-function formGroup(space, i, s) {
-  const gAfter = doFormGroup(1, space, i, s, [])
-  console.log('formGroup, gAfter', gAfter)
-
-  if (gAfter.spaceLeft === 0) {
-    // gAfter.g.metFloor = false
-    // gAfter.g.metCeiling = !!gAfter.reached
-    return {
-      g: gAfter.g, spaceLeft: gAfter.spaceLeft,
-      reachedLowerLimit: false,
-      reachedUpperLimit: gAfter.reached
-    }
-  }
-
-  const gBefore = doFormGroup(-1, gAfter.spaceLeft, i, s, [])
-  console.log('formGroup, gBefore', gBefore)
-
-  return {
-    g: gBefore.concat(gAfter),
-    spaceLeft: gBefore.spaceLeft,
-    reachedUpperLimit: gAfter.reached,
-    reachedLowerLimit: gBefore.reached
-  }
-}
-
-function doFormGroup(d, spaceLeft, i, s, g) {
-  if (i+d > s.length-1 || i+d < 0) {
-    return {reached: true, spaceLeft, g}
-  }
-
-  const spaceLeftNew = spaceLeft - s[i+d].space
-
-  if (spaceLeftNew > 0) {
-    (d > 0) ? g.push(i+d) : g.unshift(i+d)
-    (d > 0) ? d++ : d--
-
-    return doFormGroup(d, spaceLeftNew, i, s, g)
-  } else if (spaceLeftNew < 0) {
-    return {reached: true, spaceLeft, g}
-  } else {
-    return {g, spaceLeftNew}
-  }
-
-  // if (spaceLeftNew === 0) {
-  //   return {g, spaceLeftNew}
-  // } else if (spaceLeftNew < 0) {
-  //   return {reached: true, spaceLeft, g}
-  // } else {
-  //   (d > 0) ? g.push(i+d) : g.unshift(i+d)
-  //   (d > 0) ? d++ : d--
-  //   return doFormGroup(d, spaceLeftNew, i, s, g)
-  // }
-
-  // if (spaceLeft === 0) {
-  //   return {g, spaceLeft}
-  // } else if (spaceLeft < 0) {
-  //   spaceLeft += spaceAdj
-  //   return {reached: true, spaceLeft, g}
-  // } else {
-  //   g.add(i+d.v)
-  //   d.increment()
-  //   return doFormGroup(d, spaceLeft, i, s, Object.assign(g, spaceLeft))
-  // }
-}
-
-function doFormGroup(d, spaceLeft, i, s, g) {
-  if (i+d.d > s.length-1 || i+d.d < 0) {
-    return {reached: true, spaceLeft, g}
-  }
-
-  if (spaceLeft < 0) {
-    return {reached: true, spaceLeft: spaceLeft + s[i+d.d].space, g}
-  } else if (spaceLeft === 0) {
-    return {g, spaceLeft}
-  } else {
-    g.add(i+d.d)
-    // spaceLeft -= s[i+d.d].space
-    d.increment()
-    return doFormGroup(d, spaceLeft, i, s, Object.assign(g, spaceLeft))
-  }
-}
 */
 
 module.exports = {
   formGroup, doFormGroup, formGroups,
-  GroupsByItem, Variant, UniDirectionalList, Delta,
+  GroupsByItem, 
 }

@@ -1,8 +1,8 @@
 const {
   randomBinarySequence, randomBinarySequences, compare,
-  randomBinaryProportionateSeqSecond,
+  randomBinaryProportionateSeqSecond, randomPropSortedSeqSecond,
   binaryPermutations, demoBinaryPermutations
-} = require('./helpers')
+} = require('./test-helpers')
 const {
   maximizeGroupsDifference, sortItemsBySpace,
   formGroups,
@@ -14,11 +14,6 @@ function tryOutFormGroups(slots, n, w, nSpace, wSpace) {
   return prettifyGroupsByItem(formGroupsDev(slots, s, sS), s)
 }
 
-function randomPropSortedSeqSecond(n,w, nSpace,wSpace) {
-  const s = randomBinaryProportionateSeqSecond(n,w, nSpace,wSpace)
-  return {s, sS: sortItemsBySpace(s).get(wSpace)}
-}
-
 function prettifyGroupsByItem(gs, s) {
   const sP = s.map(i => i.space)
   const gsM = []
@@ -28,6 +23,6 @@ function prettifyGroupsByItem(gs, s) {
 }
 
 module.exports = {
-  randomPropSortedSeqSecond, prettifyGroupsByItem,
+  prettifyGroupsByItem,
   tryOutFormGroups
 }
