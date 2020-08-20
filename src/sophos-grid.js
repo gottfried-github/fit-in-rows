@@ -34,6 +34,44 @@ function formGroups(space, s, items) {
   return groupsByItem.toArray()
 }
 
+/*
+*/
+
+class _Group {
+  constructor(origin, spaceToFill, before, after) {
+    this.origin = origin
+    this.before = before || null
+    this.after = after || null
+    this.spaceToFill = spaceToFill
+  }
+
+  // get spaceLeft() {
+  //   let space = this.spaceToFill
+  //
+  //   return this.spaceToFill - this.before
+  // }
+
+  get sequence() {
+    return [
+      ...(this.before || []),
+      this.origin,
+      ...(this.after || [])
+    ]
+  }
+
+  set sequence() {
+    throw new Error('sequence is read-only')
+  }
+
+  get originI() {
+    return (this.before || []).length
+  }
+
+  set originI() {
+    throw new Error('originI is read-only')
+  }
+}
+
 function formGroup(space, i, s) {
   space -= s[i].space
 
