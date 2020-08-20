@@ -71,6 +71,7 @@ function formGroup(space, i, s) {
 
 function doFormGroup(d, spaceLeft, i, s, g) {
   if (i+d > s.length-1 || i+d < 0) {
+    // $Group.Reaching-Limit.3
     // console.log('doFormGroup, i+d > s.length-1 || i+d < 0');
     return {reached: true, spaceLeft, g}
   }
@@ -89,55 +90,10 @@ function doFormGroup(d, spaceLeft, i, s, g) {
     (d > 0) ? g.push(i+d) : g.unshift(i+d)
     return {g, spaceLeft: spaceLeftNew}
   } else {
+    // $Group.Reaching-Limit.2
     return {reached: true, spaceLeft, g}
   }
 }
-
-/*
-class Variant {
-  constructor(items, compatiblePredecessors) {
-    this.items = items || []
-    this.compatiblePredecessors = compatiblePredecessors || []
-  }
-}
-
-class UniDirectionalList {
-  constructor(fwd, items) {
-    if ('boolean' !== typeof(fwd)) throw new Error('fwd must be a boolean')
-    this.fwd = fwd
-
-    this.items = items || []
-  }
-
-  add(...items) {
-    (this.fwd)
-      ? this.items.push(...items)
-      : this.items.unshift(...items.reverse())
-  }
-}
-
-class Delta {
-  constructor(v) {
-    if (undefined !== v) this.v = v
-  }
-
-  set v(v) {
-    if ("number" !== typeof(v) || !Number.isInteger(v) || 0 === v)
-      throw new Error("delta must be an integer, greater or less than 0")
-
-    this._v = v
-  }
-
-  get v() {
-    return this._v
-  }
-
-  increment() {
-    (this.v > 0) ? this.v++ : this.v--
-    return this.v
-  }
-}
-*/
 
 module.exports = {
   formGroup, doFormGroup, formGroups,
