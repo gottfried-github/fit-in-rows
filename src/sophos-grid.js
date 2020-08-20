@@ -45,17 +45,32 @@ class _Group {
     this.spaceToFill = spaceToFill
   }
 
-  // get spaceLeft() {
-  //   let space = this.spaceToFill
-  //
-  //   return this.spaceToFill - this.before
-  // }
+  get reachedLeftLimit() {
+    return (this.before)
+      ? this.before.reached
+      : false
+  }
+
+  get reachedRightLimit() {
+    return (this.after)
+      ? this.after.reached : false
+  }
+
+  get spaceLeft() {
+    return this.spaceToFill - (
+      1 +
+      (this.before && 'number' === typeof(this.before.spaceLeft) || 0) +
+      (this.after && 'number' === typeof(this.after.spaceLeft) || 0)
+    )
+  }
+
+  set spaceLeft() {
+    throw new Error('spaceLeft is read-only')
+  }
 
   get sequence() {
     return [
-      ...(this.before || []),
-      this.origin,
-      ...(this.after || [])
+      ...(this.before || []), this.origin, ...(this.after || [])
     ]
   }
 
@@ -106,6 +121,14 @@ function formGroup(space, i, s) {
     reachedLeftLimit: gBefore.reached
   }
 }
+
+/*
+class GroupHalf {
+  constructor(sequence, spaceLeft, reached) {
+
+  }
+}
+*/
 
 function doFormGroup(d, spaceLeft, i, s, g) {
   if (i+d > s.length-1 || i+d < 0) {
