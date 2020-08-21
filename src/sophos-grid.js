@@ -34,16 +34,52 @@ function formGroups(space, s, items) {
   return groupsByItem.toArray()
 }
 
+
 /**
   @param {Int} originI index of the origin item in the sequence, from which
   items are taken
 */
 class _Group {
-  constructor(origin, originI, spaceToFill, before, after) {
-    this.origin = origin; this.originI = originI
+  constructor(originI, spaceToFill, sequence) {
+    this.originI = originI
     this.spaceToFill = spaceToFill
-    this.before = before || null
-    this.after = after || null
+    this.sequence = sequence
+
+    const res = this.form(originI, spaceToFill, sequence)
+    if (res.after) this.after = res.after
+    if (res.before) this.before = res.before
+  }
+
+  form(i, space, s) {
+    space -= s[i].space
+    if (space <= 0) {
+      return null
+      // return new _Group(s[i], i, spaceToFill, null, null)
+      // return {
+      //   g: [i], spaceLeft: space,
+      //   reachedLeftLimit: true, reachedRightLimit: true,
+      // }
+    }
+
+    const after = doFormGroup(1, space, i, s, [])
+    console.log('formGroup, after', after)
+
+    if (after.spaceLeft === 0) {
+      return {after}
+      // return new _Group(s[i], i, spaceToFill, null, after)
+      // return {
+      //   g: [i].concat(after.g),
+      //   spaceLeft: after.spaceLeft,
+      //   reachedLeftLimit: false,
+      //   reachedRightLimit: !!after.reached
+      // }
+    }
+
+    const before = doFormGroup(-1, after.spaceLeft, i, s, [])
+    console.log('formGroup, before', before)
+
+    return {after, before}
+    // return new _Group(s[i], i, spaceToFill, before, after)
   }
 
   get reachedLeftLimit() {
