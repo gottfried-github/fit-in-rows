@@ -132,6 +132,62 @@ class _Group {
   }
 }
 
+// class to use in functional formGroup right below
+class Group {
+  constructor(originI, spaceToFill, sequence, {before, after}) {
+
+  }
+
+  get origin() {
+    return this._sequence[this._originI]
+  }
+
+
+}
+
+function formGroup(originI, spaceToFill, sequence) {
+  // if ()
+}
+
+function formSide(s, sSrc, spaceLeft) {
+  const item = sSrc.shift()
+  const spaceLeftNew = spaceLeft - item.space
+
+  if (spaceLeftNew >= 0) s.push(item)
+
+  if (spaceLeftNew > 0) return formSide(s, sSrc, spaceLeftNew)
+  if (0 === spaceLeftNew) return {s, spaceLeft: spaceLeftNew, reachedLimit: false}
+
+  return {s, spaceLeft, reachedLimit: true}
+}
+
+// example usage of formSide; a sketch for formGroup (although likely irrelevant)
+function formGroup(originI, spaceToFill, sequence) {
+  const origin = sequence[originI]
+  const sBefore = sequence.slice(0, originI)
+  const sAfter = sequence.slice(originI)
+
+  return {
+    before: (sBefore.length > 0)
+      ? formSide([], sBefore.reverse(), spaceLeft).reverse() : null,
+    after: (sBefore.length > 0)
+      ? formSide([], sAfter, spaceLeft) : null
+  }
+}
+
+// example usage of formSide
+function lookFwd(originI, spaceToFill, sequence) {
+  return formSide([], sequence.slice(originI), spaceToFill)
+}
+
+// example usage of formSide
+function lookBwd(originI, spaceToFill, sequence) {
+  return formSide(
+    [], sequence.slice(0, originI).reverse(), spaceToFill
+  ).reverse()
+}
+
+
 function formGroup(spaceToFill, i, s) {
   let spaceLeft = spaceToFill
   spaceLeft -= s[i].space
