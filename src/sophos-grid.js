@@ -34,103 +34,102 @@ function formGroups(space, s, items) {
   return groupsByItem.toArray()
 }
 
-
 /**
   @param {Int} originI index of the origin item in the sequence, from which
   items are taken
+  class _Group {
+    constructor(originI, spaceToFill, sequence) {
+      this.originI = originI
+      this.spaceToFill = spaceToFill
+      this.sequence = sequence
+
+      const res = this.form(originI, spaceToFill, sequence)
+      if (res.after) this.after = res.after
+      if (res.before) this.before = res.before
+    }
+
+    form(i, space, s) {
+      space -= s[i].space
+      if (space <= 0) {
+        return null
+        // return new _Group(s[i], i, spaceToFill, null, null)
+        // return {
+        //   g: [i], spaceLeft: space,
+        //   reachedLeftLimit: true, reachedRightLimit: true,
+        // }
+      }
+
+      const after = doFormGroup(1, space, i, s, [])
+      console.log('formGroup, after', after)
+
+      if (after.spaceLeft === 0) {
+        return {after}
+        // return new _Group(s[i], i, spaceToFill, null, after)
+        // return {
+        //   g: [i].concat(after.g),
+        //   spaceLeft: after.spaceLeft,
+        //   reachedLeftLimit: false,
+        //   reachedRightLimit: !!after.reached
+        // }
+      }
+
+      const before = doFormGroup(-1, after.spaceLeft, i, s, [])
+      console.log('formGroup, before', before)
+
+      return {after, before}
+      // return new _Group(s[i], i, spaceToFill, before, after)
+    }
+
+    get reachedLeftLimit() {
+      return (this.before)
+        ? this.before.reached
+        : false
+    }
+
+    set reachedLeftLimit() {
+      throw new Error('reachedLeftLimit is read-only')
+    }
+
+    get reachedRightLimit() {
+      return (this.after)
+        ? this.after.reached : false
+    }
+
+    set reachedRightLimit() {
+      throw new Error('reachedRightLimit is read-only')
+    }
+
+    get spaceLeft() {
+      return this.spaceToFill - (
+        this.origin.space +
+        (this.before && 'number' === typeof(this.before.spaceLeft) || 0) +
+        (this.after && 'number' === typeof(this.after.spaceLeft) || 0)
+      )
+    }
+
+    set spaceLeft() {
+      throw new Error('spaceLeft is read-only')
+    }
+
+    get sequence() {
+      return [
+        ...(this.before || []), this.origin, ...(this.after || [])
+      ]
+    }
+
+    set sequence() {
+      throw new Error('sequence is read-only')
+    }
+
+    get originI() {
+      return (this.before || []).length
+    }
+
+    set originI() {
+      throw new Error('originI is read-only')
+    }
+  }
 */
-class _Group {
-  constructor(originI, spaceToFill, sequence) {
-    this.originI = originI
-    this.spaceToFill = spaceToFill
-    this.sequence = sequence
-
-    const res = this.form(originI, spaceToFill, sequence)
-    if (res.after) this.after = res.after
-    if (res.before) this.before = res.before
-  }
-
-  form(i, space, s) {
-    space -= s[i].space
-    if (space <= 0) {
-      return null
-      // return new _Group(s[i], i, spaceToFill, null, null)
-      // return {
-      //   g: [i], spaceLeft: space,
-      //   reachedLeftLimit: true, reachedRightLimit: true,
-      // }
-    }
-
-    const after = doFormGroup(1, space, i, s, [])
-    console.log('formGroup, after', after)
-
-    if (after.spaceLeft === 0) {
-      return {after}
-      // return new _Group(s[i], i, spaceToFill, null, after)
-      // return {
-      //   g: [i].concat(after.g),
-      //   spaceLeft: after.spaceLeft,
-      //   reachedLeftLimit: false,
-      //   reachedRightLimit: !!after.reached
-      // }
-    }
-
-    const before = doFormGroup(-1, after.spaceLeft, i, s, [])
-    console.log('formGroup, before', before)
-
-    return {after, before}
-    // return new _Group(s[i], i, spaceToFill, before, after)
-  }
-
-  get reachedLeftLimit() {
-    return (this.before)
-      ? this.before.reached
-      : false
-  }
-
-  set reachedLeftLimit() {
-    throw new Error('reachedLeftLimit is read-only')
-  }
-
-  get reachedRightLimit() {
-    return (this.after)
-      ? this.after.reached : false
-  }
-
-  set reachedRightLimit() {
-    throw new Error('reachedRightLimit is read-only')
-  }
-
-  get spaceLeft() {
-    return this.spaceToFill - (
-      this.origin.space +
-      (this.before && 'number' === typeof(this.before.spaceLeft) || 0) +
-      (this.after && 'number' === typeof(this.after.spaceLeft) || 0)
-    )
-  }
-
-  set spaceLeft() {
-    throw new Error('spaceLeft is read-only')
-  }
-
-  get sequence() {
-    return [
-      ...(this.before || []), this.origin, ...(this.after || [])
-    ]
-  }
-
-  set sequence() {
-    throw new Error('sequence is read-only')
-  }
-
-  get originI() {
-    return (this.before || []).length
-  }
-
-  set originI() {
-    throw new Error('originI is read-only')
-  }
-}
 
 // class to use in functional formGroup right below
 class Group {
@@ -147,6 +146,7 @@ class Group {
 
 function formGroup(originI, spaceToFill, sequence) {
   // if ()
+
 }
 
 function formSide(s, sSrc, spaceLeft) {
@@ -161,7 +161,20 @@ function formSide(s, sSrc, spaceLeft) {
   return {s, spaceLeft, reachedLimit: true}
 }
 
+/*
 // example usage of formSide; a sketch for formGroup (although likely irrelevant)
+function formGroup(originI, spaceToFill, sequence) {
+  const origin = sequence[originI]
+  const sBefore = sequence.slice(0, originI)
+  const sAfter = sequence.slice(originI)
+
+  return {
+    before: (sBefore.length > 0)
+      ? formSide([], sBefore.reverse(), SpaceToFill-origin.space).reverse() : null,
+    after: (sBefore.length > 0)
+      ? formSide([], sAfter, spaceLeft) : null
+  }
+}
 function formGroup(originI, spaceToFill, sequence) {
   const origin = sequence[originI]
   const sBefore = sequence.slice(0, originI)
@@ -186,8 +199,9 @@ function lookBwd(originI, spaceToFill, sequence) {
     [], sequence.slice(0, originI).reverse(), spaceToFill
   ).reverse()
 }
+*/
 
-
+/*
 function formGroup(spaceToFill, i, s) {
   let spaceLeft = spaceToFill
   spaceLeft -= s[i].space
@@ -260,14 +274,6 @@ function formGroup(space, i, s) {
   }
 }
 
-/*
-class GroupHalf {
-  constructor(sequence, spaceLeft, reached) {
-
-  }
-}
-*/
-
 class GroupHalf {
   constructor(sequence, spaceLeft, reachedLimit) {
     this.sequence = sequence
@@ -304,8 +310,9 @@ function doFormGroup(d, spaceLeft, i, s, g) {
     // return {reached: true, spaceLeft, g}
   }
 }
+*/
 
 module.exports = {
-  formGroup, doFormGroup, formGroups,
+  formGroup, formSide,
   GroupsByItem,
 }
