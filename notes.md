@@ -23,7 +23,6 @@ The `limit` gets reached when:
 1. If the `origin` is the first or the last item in the group, then the opposite side has reached the `limit`
 2. If the space of an adjacent item is greater than the space left to fill, or
 3. If there's no more items left in the sequence from which the group is formed
-
 -->
 <!--
 1. If the `space` is filled
@@ -46,6 +45,11 @@ A group is associated with an `origin` item.
 -- then the side at which either condition is true has reached the `limit`.
 -->
 
+## FormSide
+*note:* In the return value of `formSide`, this is impossible: `spaceLeft > 0 && false === reachedLimit`
+
+*techical note*
+it would most likely be better to handle the case of empty source sequence (`sSrc`) inside the `spaceLeftNew > 0` condition (under which the function makes a recursive call)
 
 # maximizeGroupsDifference
 * increase the `difference` between ratios of wide and narrow items in adjacent groups
