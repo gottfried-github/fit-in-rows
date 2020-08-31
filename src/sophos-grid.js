@@ -145,7 +145,48 @@ class Group {
 }
 
 function formGroup(originI, spaceToFill, sequence) {
-  // if ()
+  const origin = sequence[originI]
+  // const before = sequence.slice(0, originI)
+  // const after = sequence.slice(originI+1)
+  if (0 === originI) {
+    const after = formSide([], sequence.slice(1), spaceToFill-origin.space)
+    return {
+      origin, after: after.s, before: null,
+      reachedLeftLimit: true, // $Groups.Reaching-Limit.3
+      reachedRightLimit: true, // $Groups.Reaching-Limit.1 (see * below)
+      spaceLeft: after.spaceLeft
+    }
+
+    // * some, possibly, irrelevant notes:
+    // if !after.reachedLimit, then spaceLeft must be 0
+    // (see $FormSide.note)
+  }
+
+
+  if (sequence.length-1 === originI) {
+    const before = formSide([],
+      sequence.slice(0, sequence.length-2).reverse(),
+      spaceToFill-origin.space
+    ); before.s.reverse()
+
+    return {
+      origin, after: null, before: before.s,
+      reachedLeftLimit: true, // $Groups.Reaching-Limit.1
+      reachedRightLimit: true, // $Groups.Reaching-Limit.3
+      spaceLeft: before.spaceLeft
+    }
+  }
+
+  const before = formSide([],
+    sequence.slice(0, originI).reverse(),
+    spaceToFill-origin.space
+  ); before.s.reverse()
+
+  const after = formSide([], sequence.slice(originI+1), spaceToFill-origin.space)
+
+  return {
+
+  }
 
 }
 
