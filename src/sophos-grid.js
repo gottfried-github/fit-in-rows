@@ -149,7 +149,13 @@ function formGroup(originI, spaceToFill, sequence) {
 
 }
 
+/**
+
+  @returns
+*/
 function formSide(s, sSrc, spaceLeft) {
+  if (sSrc.length === 0) return {s, spaceLeft, reachedLimit: true}
+
   const item = sSrc.shift()
   const spaceLeftNew = spaceLeft - item.space
 

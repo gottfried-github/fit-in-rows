@@ -46,6 +46,9 @@ A group is associated with an `origin` item.
 -- then the side at which either condition is true has reached the `limit`.
 -->
 
+## FormSide
+*techical note*
+it would most likely be better to handle the case of empty source sequence (`sSrc`) inside the `spaceLeftNew > 0` condition (under which the function makes a recursive call)
 
 # maximizeGroupsDifference
 * increase the `difference` between ratios of wide and narrow items in adjacent groups
