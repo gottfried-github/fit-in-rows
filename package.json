@@ -1,7 +1,7 @@
 {
   "name": "sophos-grid",
   "version": "0.0.1",
-  "main": "src/sohos-grid.js",
+  "main": "src/sophos-grid.js",
   "repository": "/",
   "author": "spti <dannvx@gmail.com>",
   "license": "MIT",
