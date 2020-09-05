@@ -191,7 +191,49 @@ function formGroups(spaceToFill, sequence) {
 
 /**
   @param groups from formGroups
+  @param groupsInitial refs to @groups
 */
+function findGroupSequences(groups) {
+  const sequences = []
+  const sequencesByGroups = []
+  const groupsInitial = []
+
+  groups.forEach((g, i) => {
+    if (0 === i) {sequences.push([i]); return}
+
+    const sequence = sequences[sequences.length-1]
+    const gPrev = sequence[sequence.length-1]
+
+    if (overlaps(g, gPrev)) {
+      groupsInitial.push(i); return
+    }
+
+    if (isAdjacent(g, gPrev)) {
+      sequence.push(g); sequencesByGroups[i] = [sequences.length-1]
+      return
+    }
+
+    // if (!overlaps(g, gPrev) && isAdjacent(g, gPrev)) {
+    //   sequences[0].push(g)
+    // } else {
+    //   groupsInitial.push(i)
+    // }
+  })
+
+  doFindGroupSequences(groups, groupsInitial, sequences, sequencesByGroups)
+}
+
+function doFindGroupSequences(groups, groupsInitial, sequences, sequencesByGroups) {
+}
+
+/*
+function findGroupSequences(groups) {
+  const sequences = []
+  const sequencesByGroups = []
+
+  groups.forEach()
+}
+
 function sequenceGroups(groups) {
   const sequences = []
   groups.forEach(g => {
@@ -207,6 +249,7 @@ function sequenceGroups(groups) {
     }
   })
 }
+*/
 
 /**
   @param {[Int, Int, ...]} a, b
@@ -241,6 +284,10 @@ function overlaps(a, b) {
   return false
 }
 
+function isAdjacent(a, b) {
+  return b[0] - a[a.length-1] === 1
+    || a[0] - b[b.length-1] === 1
+}
 /**
 
   @returns
