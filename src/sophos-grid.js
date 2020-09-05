@@ -25,15 +25,6 @@ class GroupsByItem {
   }
 }
 
-function formGroups(space, s, items) {
-  const groupsByItem = new GroupsByItem()
-  items.forEach(i => {
-    groupsByItem.push(i, formGroup(space, i, s))
-  })
-
-  return groupsByItem.toArray()
-}
-
 /**
   @param {Int} originI index of the origin item in the sequence, from which
   items are taken
@@ -177,6 +168,79 @@ function formGroup(originI, spaceToFill, sequence) {
 
 }
 
+function breakIntoGroups() {}
+
+function formGroups(spaceToFill, sequence) {
+  const groups = []
+
+  const sequenceIndexed = sequence.map((item, i) => {
+    return {...item, i}
+  })
+
+  while (sequenceIndexed.length>0) {
+    groups.push(formSide([], [].concat(sequenceIndexed), spaceToFill))
+    sequenceIndexed.shift()
+  }
+
+  // sequence.forEach((item, i) => {
+  //   const g = formSide([], sequence, spaceToFill)
+  // })
+
+  return groups
+}
+
+/**
+  @param groups from formGroups
+*/
+function sequenceGroups(groups) {
+  const sequences = []
+  groups.forEach(g => {
+    if (sequences.length === 0) {
+      sequences.push([g])
+      return
+    }
+
+    const sequence = sequences[sequences.length-1]
+    const gPrev = sequence[sequence.length-1]
+    if (!overlaps(gPrev, g)) {
+      sequence.push(g)
+    }
+  })
+}
+
+/**
+  @param {[Int, Int, ...]} a, b
+*/
+function overlaps(a, b) {
+  const overlap = []
+  a.forEach((i) => {
+    if (b.includes(i)) overlap.push(i)
+  })
+
+  let res = null
+
+  if (overlap.length>0) {
+    const aI = a.indexOf(overlap[0]),
+    bI = b.indexOf(overlap[0])
+
+    if (aI > bI) {
+      return {
+        res: [a, overlap, b],
+        // res: [a.slice(0, aI), overlap, b.slice(bI+overlap.length)],
+      }
+    } else if (bI > aI) {
+      return {
+        res: [b, overlap, a],
+        // res: [b.slice(0, bI), overlap, a.slice(aI+overlap.length)],
+      }
+    }
+
+    return true
+  }
+
+  return false
+}
+
 /**
 
   @returns
@@ -196,6 +260,7 @@ function formSide(s, sSrc, spaceLeft) {
 }
 
 module.exports = {
-  formGroup, formSide,
+  formGroups,
+  formSide,
   GroupsByItem,
 }
