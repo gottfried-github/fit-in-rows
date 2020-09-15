@@ -1,32 +1,8 @@
 const {doRecursivelyIterate, makeRecursivelyIterate} = require('recursion-and-discrete-math')
 const {randomBinaryProportionateSeqSecond} = require('./test-helpers')
 
-class GroupsByItem {
-  constructor() {
-    this.items = new Map()
-  }
+const {permutationsToCombinations, getSize, isRatioEqual, overlaps, isAdjacent, sortItemsByType} = require('./src/helpers')
 
-  push(i, ...groups) {
-    if (this.items.has(i)) {
-      this.items.get(i).push(...groups)
-    } else {
-      this.items.set(i, [...groups])
-    }
-
-    // this.items.push(new ItemGroups(i, groups))
-  }
-
-  toArray() {
-    const itemsArr = []
-    console.log(this.items)
-    for (var [k,v] of this.items.entries()) {
-      // console.log(k,v)
-      itemsArr.push({i: k, gs: v})
-    }
-
-    return itemsArr
-  }
-}
 
 /**
   itemSchemas: {anyOf: [1, 2]} // amount of space an item can take
@@ -150,77 +126,6 @@ function createSchemaPermutations(size, itemTypes) {
 }
 */
 
-// this, I believe, doesnt work properly
-function permutationsToCombinations(ps, itemTypes) {
-  const combinations = []
-
-  const ratios = ps.reduce((ratios, p, i) => {
-    const pR = sortItemsByType(p)
-    if (0 === ratios.length) return [pR]
-
-    let _i = 0, l = ratios.length
-    while (_i < l) {
-      console.log(ps[i])
-      if (isRatioEqual(ratios[_i], pR)) return ratios
-
-      combinations.push(ps[i])
-
-      ratios.push(pR)
-      _i++
-    }
-
-    return ratios
-  }, [])
-
-  return combinations
-}
-
-function isRatioEqual(a, b) {
-  const bKs = b.keys()
-  // console.log(bKs)
-
-  if (a.size !== b.size) return false
-
-  let {done, value} = bKs.next()
-
-  while (!done) {
-    if (
-    !a.has(value) || a.get(value).length !== b.get(value).length
-    ) break
-
-    const res = bKs.next()
-    done = res.done; value = res.value
-  }
-
-  return done
-}
-
-function sortItemsByType(items) {
-  return items.reduce((topology, v, i) => {
-    if (topology.has(v)) {
-      topology.get(v).push(i)
-    } else {
-      topology.set(v, [i])
-    }
-
-    return topology
-  }, new Map())
-}
-
-function getSize(sequence) {
-  return sequence.reduce((sum, i) => sum+i, 0)
-}
-
-function formGroup(schemas, sequence) {
-  let g = {s:[], schemaLeft: [null]}
-
-  while (g.shemaLeft.length === 0 || schemas.length === 0) {
-    g = formSideBySchema([], [].concat(sequence), schemas.shift())
-  }
-
-  return g
-}
-
 function formGroupsAll(space, sequence) {
   return space.reduce((bySpace, space) => {
     bySpace.push(formGroupsAllHomo(space, sequence.map(i => i)))
@@ -267,6 +172,18 @@ function formGroups(spaceToFill, sequence) {
   return groups
 }
 
+/*
+function formGroup(schemas, sequence) {
+  let g = {s:[], schemaLeft: [null]}
+
+  while (g.shemaLeft.length === 0 || schemas.length === 0) {
+    g = formSideBySchema([], [].concat(sequence), schemas.shift())
+  }
+
+  return g
+}
+*/
+
 function fillSpace(d, sSrc, s, fill) {
   if (sSrc.length === 0) return {s, d, reachedLimit: true}
 
@@ -281,22 +198,6 @@ function fillSpace(d, sSrc, s, fill) {
   return fill(dNew, sSrc, s, fill)
 }
 
-/**
-  Example:
-  `
-  const sSrc = [{space: 1}, {space: 2}, {space: 1}]
-
-  // both return: s: [1,2], reachedLimit: false, schemaLeft: []
-  formSideBySchema([1,2], sSrc.map(i => i), [], formSideBySchema)
-  formSideBySchema([2,1], sSrc.map(i => i), [], formSideBySchema)
-
-  // returns: s: [1], reachedLimit: true, schemaLeft: [1,1]
-  g.formSideBySchema([], sSrc, [1,1,1], g.formSideBySchema)
-
-  // returns: s: [1,1], reachedLimit: true, schemaLeft: [1]
-  formSideBySchema([1,1,1], [{space: 1}, {space: 1}], [], formSideBySchema)
-  `
-*/
 function fillSchema(d, sSrc, s, fill) {
   if (sSrc.length === 0) return {s, d, reachedLimit: true}
 
@@ -357,46 +258,6 @@ function fillSpace(d, sSrc, s, formSide) {
   return formSide(dNew, sSrc, s, formSide)
 }
 */
-
-/**
-  @param {[Int, Int, ...]} a, b
-  // this hasn't been run
-*/
-function overlaps(a, b) {
-  const overlap = []
-  a.forEach((i) => {
-    if (b.includes(i)) overlap.push(i)
-  })
-
-  let res = null
-
-  if (overlap.length>0) {
-    const aI = a.indexOf(overlap[0]),
-    bI = b.indexOf(overlap[0])
-
-    if (aI > bI) {
-      return {
-        res: [a, overlap, b],
-        // res: [a.slice(0, aI), overlap, b.slice(bI+overlap.length)],
-      }
-    } else if (bI > aI) {
-      return {
-        res: [b, overlap, a],
-        // res: [b.slice(0, bI), overlap, a.slice(aI+overlap.length)],
-      }
-    }
-
-    return true
-  }
-
-  return false
-}
-
-// this hasn't been run
-function isAdjacent(a, b) {
-  return b[0] - a[a.length-1] === 1
-    || a[0] - b[b.length-1] === 1
-}
 
 module.exports = {
   formGroupsAll, formGroupsAllHomo,
