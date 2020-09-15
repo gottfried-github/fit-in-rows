@@ -1,4 +1,5 @@
 const {doRecursivelyIterate, makeRecursivelyIterate} = require('recursion-and-discrete-math')
+const {randomBinaryProportionateSeqSecond} = require('./test-helpers')
 
 class GroupsByItem {
   constructor() {
@@ -76,8 +77,6 @@ function formAllSequences(itemTypes, groupSize) {
   while (size < groupSize.max) {
     groupSizes.push(size++)
   }
-
-
 }
 
 function createSchemaPermutations(size, itemTypes) {
@@ -116,9 +115,40 @@ function createSchemaPermutations(size, itemTypes) {
   return schemas
 }
 
-function getSize(sequence) {
-  return sequence.reduce((sum, i) => sum+i, 0)
+/*
+// eg, for size 2: [2], [1,1]
+// size 3: [1,1,1], [1,2]
+// size 4: [1,1,2], [2,2]
+function createSchemaPermutations(size, itemTypes) {
+  const ps = []
+  const schemas = []
+
+  const l =
+
+  const i = makeRecursivelyIterate((v, data, depth, cb) => {
+    // console.log('v: ', v, 'data: ', data, 'depth: ', depth)
+    cb((v) ? [data].concat(v) : [data])
+  })
+
+  i(itemTypes, size, false, (v) => {ps.push(v)}, i)
+
+  ps.forEach((p, i) => {
+    if (size === p.reduce((sum, i) => sum+i, 0)) schemas.push(p)
+  })
+
+  // const psSizes = ps.map(p => p.reduce((sum, i) => sum+i, 0))
+  // const psSizesVisited = []
+  //
+  // psSizes.forEach((p, i) => {
+  //   if (psSizesVisited.includes(p)) return
+  //
+  //   schemas.push(ps[i])
+  //   psSizesVisited.push(p)
+  // })
+
+  return schemas
 }
+*/
 
 // this, I believe, doesnt work properly
 function permutationsToCombinations(ps, itemTypes) {
@@ -144,8 +174,6 @@ function permutationsToCombinations(ps, itemTypes) {
 
   return combinations
 }
-
-
 
 function isRatioEqual(a, b) {
   const bKs = b.keys()
@@ -179,40 +207,9 @@ function sortItemsByType(items) {
   }, new Map())
 }
 
-// eg, for size 2: [2], [1,1]
-// size 3: [1,1,1], [1,2]
-// size 4: [1,1,2], [2,2]
-/*
-function createSchemaPermutations(size, itemTypes) {
-  const ps = []
-  const schemas = []
-
-  const l =
-
-  const i = makeRecursivelyIterate((v, data, depth, cb) => {
-    // console.log('v: ', v, 'data: ', data, 'depth: ', depth)
-    cb((v) ? [data].concat(v) : [data])
-  })
-
-  i(itemTypes, size, false, (v) => {ps.push(v)}, i)
-
-  ps.forEach((p, i) => {
-    if (size === p.reduce((sum, i) => sum+i, 0)) schemas.push(p)
-  })
-
-  // const psSizes = ps.map(p => p.reduce((sum, i) => sum+i, 0))
-  // const psSizesVisited = []
-  //
-  // psSizes.forEach((p, i) => {
-  //   if (psSizesVisited.includes(p)) return
-  //
-  //   schemas.push(ps[i])
-  //   psSizesVisited.push(p)
-  // })
-
-  return schemas
+function getSize(sequence) {
+  return sequence.reduce((sum, i) => sum+i, 0)
 }
-*/
 
 function formGroup(schemas, sequence) {
   let g = {s:[], schemaLeft: [null]}
@@ -224,30 +221,31 @@ function formGroup(schemas, sequence) {
   return g
 }
 
+function formGroupsAll(space, sequence) {
+  return space.reduce((bySpace, space) => {
+    bySpace.push(formGroupsAllHomo(space, sequence.map(i => i)))
+    return bySpace
+  }, [])
+}
+
 /**
-  Form a group (of the size, specified by spaceToFill) for each
-  item in the given sequence, such that the group starts with that item.
-  This forms all possible groups with the given size; it also occasionally
-  forms some groups that are of smaller size, whenever it's not possible to
-  form the proper size
+  @param {Int || [Int]} space space to fill (either a number or a schema)
 */
-function formGroupsAll(spaceToFill, sequence) {
-  const groups = []
+function formGroupsAllHomo(space, sequence) {
+  const gs = [],
+  isSchema = Array.isArray(space),
+  fill = (isSchema) ? fillSchema : fillSpace
 
-  const sequenceIndexed = sequence.map((item, i) => {
-    return {...item, i}
-  })
+  while (sequence.length>0) {
+    // console.log(sequence);
+    const g = fill(space.map(i => i), sequence.map(i => i), [], fill)
 
-  while (sequenceIndexed.length>0) {
-    groups.push(formSide([], [].concat(sequenceIndexed), spaceToFill))
-    sequenceIndexed.shift()
+    const d = isSchema ? g.d.length : g.d
+    if (0 === d) gs.push(g)
+    sequence.shift()
   }
 
-  // sequence.forEach((item, i) => {
-  //   const g = formSide([], sequence, spaceToFill)
-  // })
-
-  return groups
+  return gs
 }
 
 function formGroups(spaceToFill, sequence) {
@@ -257,7 +255,7 @@ function formGroups(spaceToFill, sequence) {
   })
 
   while (sequence.length > 0) {
-    const g = formSide([], [].concat(sequence), spaceToFill)
+    const g = formSideBySpace([], [].concat(sequence), spaceToFill)
     groups.push(g)
     sequence.splice(0, g.s.length)
   }
@@ -265,24 +263,53 @@ function formGroups(spaceToFill, sequence) {
   return groups
 }
 
-/**
-  @returns
-*/
-function formSideBySpace(s, sSrc, spaceLeft) {
-  if (sSrc.length === 0) return {s, spaceLeft, reachedLimit: true}
+function fillSpace(d, sSrc, s, fill) {
+  if (sSrc.length === 0) return {s, d, reachedLimit: true}
 
   const item = sSrc.shift()
-  const spaceLeftNew = spaceLeft - item.space
+  const dNew = d - item.space
 
-  if (spaceLeftNew >= 0) s.push(item)
+  if (dNew < 0) return {s, d, reachedLimit: true}
 
-  if (spaceLeftNew > 0) return formSide(s, sSrc, spaceLeftNew)
-  if (0 === spaceLeftNew) return {s, spaceLeft: spaceLeftNew, reachedLimit: false}
+  s.push(item)
 
-  return {s, spaceLeft, reachedLimit: true}
+  if (0 === dNew) return {s, d: dNew, reachedLimit: false}
+  return fill(dNew, sSrc, s, fill)
 }
 
-function formSideBySchema(s, sSrc, schema) {
+/**
+  Example:
+  `
+  const sSrc = [{space: 1}, {space: 2}, {space: 1}]
+
+  // both return: s: [1,2], reachedLimit: false, schemaLeft: []
+  formSideBySchema([1,2], sSrc.map(i => i), [], formSideBySchema)
+  formSideBySchema([2,1], sSrc.map(i => i), [], formSideBySchema)
+
+  // returns: s: [1], reachedLimit: true, schemaLeft: [1,1]
+  g.formSideBySchema([], sSrc, [1,1,1], g.formSideBySchema)
+
+  // returns: s: [1,1], reachedLimit: true, schemaLeft: [1]
+  formSideBySchema([1,1,1], [{space: 1}, {space: 1}], [], formSideBySchema)
+  `
+*/
+function fillSchema(d, sSrc, s, fill) {
+  if (sSrc.length === 0) return {s, d, reachedLimit: true}
+
+  const item = sSrc.shift()
+  if (!d.includes(item.space)) return {
+    s, d, reachedLimit: true
+  }
+
+  d.splice(d.indexOf(item.space), 1)
+  s.push(item)
+
+  if (d.length === 0) return {s, d, reachedLimit: false}
+  return fill(d, sSrc, s, fill)
+}
+
+// this hasn't been run
+function formSideByOrderedSchema(schema, sSrc, s, formSide) {
   if (sSrc.length === 0) return {s, schemaLeft: schema, reachedLimit: true}
 
   const item = sSrc.shift()
@@ -294,107 +321,42 @@ function formSideBySchema(s, sSrc, schema) {
   s.push(item)
 
   if (schema.length === 0) return {s, schemaLeft: schema, reachedLimit: false}
-  return formSideBySchema(s, sSrc, schema)
+  return formSide(schema, sSrc, s, formSide)
 }
 
-function arrangeSequence(sequence, spaceToFill) {
-  const groups = formGroups(sequence)
-}
-
+// the core logic in both formGroupBySpace (fillSpace) and formGroupBySchema (fillSchema) is
+// the same, thus it might be better to put it in a single place.
+// The equivalent would be to use fillSpace for space and fillSchema for
+// for schema
 /*
-function findGroupSequences(groups) {}
-function doFindGroupSequences(groups) {
-  const sequences = []
-  const sequencesByGroups = []
+// this hasn't been run
+function fillSpace(d, sSrc, s, formSide) {
+  if (sSrc.length === 0) return {s, d, reachedLimit: true}
+  const isSchema = 'object' === typeof(d)
 
-  groups.forEach((g, i) => {
-    if (0 === i) {sequences.push([i]); return}
+  const item = sSrc.shift()
+  const dNew = (isSchema) ? d : d - item.space
 
-    const sequence = sequences[sequences.length-1]
-    const gPrev = sequence[sequence.length-1]
+  if (
+    isSchema && !dNew.includes(item.space)
+    || !isSchema && dNew < 0
+  ) return {s, d, reachedLimit: true}
 
-    if (overlaps(g, gPrev)) {
-      // groupsInitial.push(i);
-      return
-    }
+  if (isSchema) dNew.splice(dNew.indexOf(item.space), 1)
+  s.push(item)
 
-    if (!isAdjacent(g, gPrev)) return
+  if (
+    isSchema && dNew.length === 0
+    || !isSchema && 0 === dNew
+  ) return {s, d: dNew, reachedLimit: false}
 
-    if (sequencesByGroups[i]) {
-      sequencesByGroups[i].push(sequences.length-1);
-      break // i.e don't continue the forEach loop
-    }
-
-    sequence.push(g)
-    sequencesByGroups[i] = [sequences.length-1]
-  })
-}
-*/
-
-/**
-  @param groups from formGroups
-  @param groupsInitial refs to @groups
-  function findGroupSequences(groups) {
-    const sequences = []
-    const sequencesByGroups = []
-    const groupsInitial = []
-
-    groups.forEach((g, i) => {
-      if (0 === i) {sequences.push([i]); return}
-
-      const sequence = sequences[sequences.length-1]
-      const gPrev = sequence[sequence.length-1]
-
-      if (overlaps(g, gPrev)) {
-        groupsInitial.push(i); return
-      }
-
-      if (isAdjacent(g, gPrev)) {
-        sequence.push(g); sequencesByGroups[i] = [sequences.length-1]
-        return
-      }
-
-      // if (!overlaps(g, gPrev) && isAdjacent(g, gPrev)) {
-      //   sequences[0].push(g)
-      // } else {
-      //   groupsInitial.push(i)
-      // }
-    })
-
-    doFindGroupSequences(groups, groupsInitial, sequences, sequencesByGroups)
-  }
-
-  function doFindGroupSequences(groups, groupsInitial, sequences, sequencesByGroups) {
-  }
-*/
-
-/*
-function findGroupSequences(groups) {
-  const sequences = []
-  const sequencesByGroups = []
-
-  groups.forEach()
-}
-
-function sequenceGroups(groups) {
-  const sequences = []
-  groups.forEach(g => {
-    if (sequences.length === 0) {
-      sequences.push([g])
-      return
-    }
-
-    const sequence = sequences[sequences.length-1]
-    const gPrev = sequence[sequence.length-1]
-    if (!overlaps(gPrev, g)) {
-      sequence.push(g)
-    }
-  })
+  return formSide(dNew, sSrc, s, formSide)
 }
 */
 
 /**
   @param {[Int, Int, ...]} a, b
+  // this hasn't been run
 */
 function overlaps(a, b) {
   const overlap = []
@@ -426,16 +388,22 @@ function overlaps(a, b) {
   return false
 }
 
+// this hasn't been run
 function isAdjacent(a, b) {
   return b[0] - a[a.length-1] === 1
     || a[0] - b[b.length-1] === 1
 }
 
 module.exports = {
-  createSchemaPermutations,
-  formGroups, formGroupsAll,
-  permutationsToCombinations, isRatioEqual,
-  sortItemsByType,
-  // formSide,
+  formGroupsAll, formGroupsAllHomo,
+
+  fillSpace, fillSchema, formSideByOrderedSchema,
+
+  createSchemaPermutations, permutationsToCombinations,
+  isRatioEqual, sortItemsByType, getSize,
+
+  formGroups,
   GroupsByItem,
+
+  t: require('./test-helpers'),
 }
