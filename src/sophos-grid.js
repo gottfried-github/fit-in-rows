@@ -232,16 +232,20 @@ function formGroupsAll(space, sequence) {
   @param {Int || [Int]} space space to fill (either a number or a schema)
 */
 function formGroupsAllHomo(space, sequence) {
-  const gs = [],
-  isSchema = Array.isArray(space),
-  fill = (isSchema) ? fillSchema : fillSpace
+  const isSchema = Array.isArray(space),
+  fill = (isSchema) ? fillSchema : fillSpace,
+  l = sequence.length
+
+  const gs = [], gsMap = []
 
   while (sequence.length>0) {
-    // console.log(sequence);
     const g = fill(space.map(i => i), sequence.map(i => i), [], fill)
 
     const d = isSchema ? g.d.length : g.d
+    g.i = l - sequence.length
+
     if (0 === d) gs.push(g)
+
     sequence.shift()
   }
 
