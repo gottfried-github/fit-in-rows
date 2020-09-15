@@ -1,3 +1,12 @@
+# Notes
+## fillSpace and fillSchema
+The core logic in both fillSpace (formGroupBySpace) and fillSchema (formGroupBySchema) is the same, thus it might be better to put it in a single place. `fillSpace` does that.
+The equivalent would be to use `fillSpace` for space and `fillSchema` for for schema.
+These are equivalence pairs between conditions in `fillSpace` and `fillSchema` (in the sense that they return semantically equivalent values (?)):
+`spaceLeftNew < 0`, `!schema.includes(item.space)`
+`0 === spaceLeftNew`, `schema.length === 0`
+The order in which these are checked is the same in both `fillSchema` and `fillSpace`
+
 # Spec
 
 ## Slot
@@ -50,6 +59,9 @@ A group is associated with an `origin` item.
 
 *techical note*
 it would most likely be better to handle the case of empty source sequence (`sSrc`) inside the `spaceLeftNew > 0` condition (under which the function makes a recursive call)
+
+# formGroups
+
 
 # maximizeGroupsDifference
 * increase the `difference` between ratios of wide and narrow items in adjacent groups
