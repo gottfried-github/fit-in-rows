@@ -1,22 +1,60 @@
-// this, I believe, doesnt work properly
+const {doRecursivelyIterate, makeRecursivelyIterate} = require('recursion-and-discrete-math')
+
+function createSchemaPermutations(size, itemTypes) {
+  if (itemTypes.filter(t => (t>size) ? true : false).length > 0) throw new Error()
+
+  const schemas = []
+  // if (itemTypes.includes(size)) schemas.push([size])
+
+  let pSize = null, l = 0
+  while (pSize <= size) {
+    const ps = []
+
+    const i = makeRecursivelyIterate((v, data, depth, cb) => {
+      // console.log('v: ', v, 'data: ', data, 'depth: ', depth)
+      cb((v) ? [data].concat(v) : [data])
+    })
+    i(itemTypes, l, false, (v) => {ps.push(v)}, i)
+
+    // const ratios = []
+    //
+    // ps = ps.reduce((ps, p) => {
+    //   sortItemsBySpace()
+    //
+    //   return ps
+    // }, [])
+
+    pSize = Math.min(...ps.map(p => getSize(p)))
+
+    ps.forEach(p => {
+      if (size === getSize(p)) schemas.push(p)
+    })
+
+    l++
+  }
+
+  return schemas
+}
+
 function permutationsToCombinations(ps, itemTypes) {
   const combinations = []
 
   const ratios = ps.reduce((ratios, p, i) => {
+    // console.log('p', ps[i])
     const pR = sortItemsByType(p)
-    if (0 === ratios.length) return [pR]
+    if (0 === ratios.length) {
+      combinations.push(p); return [pR]
+    }
 
     let _i = 0, l = ratios.length
     while (_i < l) {
-      console.log(ps[i])
+      // console.log(ps[_i])
       if (isRatioEqual(ratios[_i], pR)) return ratios
-
-      combinations.push(ps[i])
-
-      ratios.push(pR)
       _i++
     }
 
+    combinations.push(ps[i])
+    ratios.push(pR)
     return ratios
   }, [])
 
@@ -187,7 +225,7 @@ function maximizeGroupsDifference(seq) {
 }
 
 module.exports = {
-  permutationsToCombinations,
+  createSchemaPermutations, permutationsToCombinations,
   getSize, isRatioEqual,
   overlaps, isAdjacent,
   sortItemsByType,

@@ -1,8 +1,6 @@
-const {doRecursivelyIterate, makeRecursivelyIterate} = require('recursion-and-discrete-math')
 const {randomBinaryProportionateSeqSecond} = require('./test-helpers')
 
-const {permutationsToCombinations, getSize, isRatioEqual, overlaps, isAdjacent, sortItemsByType} = require('./src/helpers')
-
+const {permutationsToCombinations, getSize, isRatioEqual, overlaps, isAdjacent, sortItemsByType} = require('./helpers')
 
 /**
   itemSchemas: {anyOf: [1, 2]} // amount of space an item can take
@@ -53,42 +51,6 @@ function formAllSequences(itemTypes, groupSize) {
   while (size < groupSize.max) {
     groupSizes.push(size++)
   }
-}
-
-function createSchemaPermutations(size, itemTypes) {
-  if (itemTypes.filter(t => (t>size) ? true : false).length > 0) throw new Error()
-
-  const schemas = []
-  // if (itemTypes.includes(size)) schemas.push([size])
-
-  let pSize = null, l = 0
-  while (pSize <= size) {
-    const ps = []
-
-    const i = makeRecursivelyIterate((v, data, depth, cb) => {
-      // console.log('v: ', v, 'data: ', data, 'depth: ', depth)
-      cb((v) ? [data].concat(v) : [data])
-    })
-    i(itemTypes, l, false, (v) => {ps.push(v)}, i)
-
-    // const ratios = []
-    //
-    // ps = ps.reduce((ps, p) => {
-    //   sortItemsBySpace()
-    //
-    //   return ps
-    // }, [])
-
-    pSize = Math.min(...ps.map(p => getSize(p)))
-
-    ps.forEach(p => {
-      if (size === getSize(p)) schemas.push(p)
-    })
-
-    l++
-  }
-
-  return schemas
 }
 
 /*
