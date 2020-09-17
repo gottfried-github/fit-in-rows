@@ -1,5 +1,11 @@
 const {doRecursivelyIterate, makeRecursivelyIterate} = require('recursion-and-discrete-math')
 
+function allSchemas(size, itemTypes, ordered) {
+  const ps = createSchemaPermutations(size, itemTypes)
+  if (ordered) return ps
+  return permutationsToCombinations(ps, itemTypes)
+}
+
 function createSchemaPermutations(size, itemTypes) {
   if (itemTypes.filter(t => (t>size) ? true : false).length > 0) throw new Error()
 
