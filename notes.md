@@ -1,4 +1,16 @@
 # Notes
+
+## Sequence
+A sequence of `items`
+
+## Subsequence (group)
+A mapping onto a `sequence`.
+Given the first `item` in the `susequence`, that `item`'s index in the `sequence` is the `location` of the `subsequence`
+
+## Subsequences (groups)
+Each subsequent `subsequence` in `subsequences` is `located` further in the `sequence` by at least *one* `item`.
+
+
 ## fillSpace and fillSchema
 The core logic in both fillSpace (formGroupBySpace) and fillSchema (formGroupBySchema) is the same, thus it might be better to put it in a single place. `fillSpace` does that.
 The equivalent would be to use `fillSpace` for space and `fillSchema` for for schema.

@@ -104,9 +104,23 @@ function getSize(sequence) {
 }
 
 /**
-  @param {[Int, Int, ...]} a, b
+  @param {Subsequence} a, b
   // this hasn't been run
 */
+function overlaps(a, b) {
+  const _a = a.s.map((item, i) => a.i+i),
+  _b = b.s.map((item, i) => b.i+i)
+
+  let i = 0, l = a.s.length
+  for (i; i<l; i++) {
+    if (_b.includes(_a[i])) return true
+  }
+
+  return false
+}
+
+/*
+@param {[Int, Int, ...]} a, b
 function overlaps(a, b) {
   const overlap = []
   a.forEach((i) => {
@@ -136,6 +150,7 @@ function overlaps(a, b) {
 
   return false
 }
+*/
 
 // this hasn't been run
 function isAdjacent(a, b) {
@@ -231,7 +246,7 @@ function maximizeGroupsDifference(seq) {
 }
 
 module.exports = {
-  createSchemaPermutations, permutationsToCombinations,
+  createSchemaPermutations, permutationsToCombinations, allSchemas,
   getSize, isRatioEqual,
   overlaps, isAdjacent,
   sortItemsByType,
