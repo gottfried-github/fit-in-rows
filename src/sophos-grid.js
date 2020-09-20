@@ -221,16 +221,216 @@ function fillSpace(d, sSrc, s, formSide) {
 }
 */
 
+/**
+  It's assumed here, that each subsequent group in groups
+  is situated further in the sequence of items by at least
+  one item (see Notes.Subsequences)
+*/
+function negateOverlaps(groups) {
+  return doNegateOverlaps(groups, [], doNegateOverlaps)
+}
+
+function doNegateOverlaps(groups, sequences, negate) {
+  if (0 === groups.length) return sequences
+
+  return negate(groups,
+    cascadeGroup(groups.shift(), sequences, cascadeGroup), negate
+  )
+}
+
+function cascadeGroup(g, sequences, cascade) {
+  if (0 === sequences.length) return [[g]]
+
+  if (!overlaps(sequences[0][sequences[0].length-1], g)) {
+    sequences[0].push(g)
+    return sequences
+  }
+
+  const s = sequences.shift()
+  return [s, ...cascade(g, sequences, cascade)]
+}
+
+/*
+function doNegateOverlaps(groups, sequences, negate) {
+  // console.log("groups:", groups, "sequences:", sequences);
+  if (0 === groups.length) return {sequences, groups}
+  // if (0 === sequences.length)
+  //   return negate(groups, [[groups.shift()]], negate)
+
+  if (!overlaps(sequences[0][0], groups[0])) {
+    sequences[0][0].unshift(groups.shift())
+    return negate(groups, sequences, negate)
+  }
+
+  const s = sequences.shift()
+  if (0 === sequences.length) return {
+    sequences: [s].concat([groups.shift()]), groups
+  }
+
+  const n = negate(groups, sequences, negate)
+
+  // if (0 === groups.length) return {sequences, groups}
+  return negate(n.groups, n.sequences, negate)
+
+  // return [s].concat(sequences)
+
+  // const s = sequences.shift()
+  // const gPrev = sequences[0][0], g = groups[0] //.shift()
+  //
+  // if (!overlaps(gPrev, g)) {
+  //   sequences[0][0].unshift(groups.shift())
+  //   return negate(groups, sequences, negate)
+  // }
+  //
+  // const s = sequences.shift()
+  // const sequences = negate(groups, sequences, negate)
+  // return negate()
+}
+
+function doNegateOverlaps(groups, sequences, negate) {
+  console.log("groups:", groups, "sequences:", sequences);
+  if (0 === groups.length) return sequences
+  if (0 === sequences.length)
+    return negate(groups, [[groups.shift()]], negate)
+
+  // const s = sequences.shift()
+  const gPrev = sequences[0][0], g = groups[0] //.shift()
+
+  if (!overlaps(gPrev, g)) {
+    sequences[0][0].unshift(groups.shift())
+    return negate(groups, sequences, negate)
+  }
+
+  const s = sequences.shift()
+  const sequences = negate(groups, sequences, negate)
+  return negate()
+
+  // if (overlaps(gPrev, g)) {
+  //   const _sequences = negate(groups, sequences, negate)
+  //
+  //   return _sequences
+  // }
+  //
+  // sequences[0][0].unshift(g)
+  // return negate(groups, sequences, negate)
+  // s.unshift(g)
+  // sequences.unshift(s)
+  //
+  // return negate(groups, sequences, negate)
+}
+
+function doNegateOverlaps(groups, sequences, negate) {
+  console.log("groups:", groups, "sequences:", sequences);
+  if (0 === groups.length) return sequences
+  if (0 === sequences.length)
+    return negate(groups, [[groups.shift()]], negate)
+
+  // const s = sequences.shift()
+  const gPrev = sequences[0][0], g = groups.shift()
+
+  if (overlaps(gPrev, g)) {
+    const _sequences = negate(groups, sequences, negate)
+
+    return _sequences
+  }
+
+  sequences[0][0].unshift(g)
+  return negate(groups, sequences, negate)
+  // s.unshift(g)
+  // sequences.unshift(s)
+  //
+  // return negate(groups, sequences, negate)
+}
+
+
+function doNegateOverlaps(groups, sequences, negate) {
+  if (0 === groups.length) return sequences
+  if (0 === sequences.length)
+    return negate(groups, [[groups.shift()]], negate)
+
+  const s = sequences.shift()
+  const gPrev = s[0], g = groups.shift()
+
+  if (overlaps(gPrev, g)) {
+    sequences = negate(
+      (0 === sequences.length) ? groups : [g].concat(groups),
+      (0 === sequences.length) ? [[g]] : sequences, negate
+    )
+
+    sequences.unshift(s)
+    return negate(groups, sequences, negate)
+  }
+
+  s.unshift(g)
+  sequences.unshift(s)
+
+  return negate(groups, sequences, negate)
+}
+
+function doNegateOverlaps(groups, sequences, negate) {
+  if (0 === groups.length) return sequences
+  if (0 === sequences.length)
+    return negate(groups, [[groups.shift()]], negate)
+
+  const s = sequences.shift()
+  const gPrev = s[0], g = groups.shift()
+
+  if (overlaps(gPrev, g)) {
+    sequences = negate(
+      (0 === sequences.length) ? groups : [g].concat(groups),
+      (0 === sequences.length) ? [[g]] : sequences, negate
+    )
+  }
+
+  // s.unshift(g)
+  sequences.unshift(s)
+
+  return sequences
+}
+
+function doNegateOverlaps(groups, sequences, negate) {
+  if (0 === groups.length) return sequences
+  if (0 === sequences.length)
+    return negate(groups, [[groups.shift()]], negate)
+
+  const sClosest = sequences.shift()
+  const gPrev = sClosest[0], g = groups.shift()
+
+  if (overlaps(gPrev, g)) {
+    return [sClosest].concat(negate(groups,
+      (0 === sequences.length) ? [[g]] : sequences, negate
+    ))
+  }
+
+  sClosest.unshift(g)
+  return [sClosest].concat(sequences)
+}
+
+function doNegateOverlaps(groups, sequences, negate) {
+  sClosest = sequences[0]
+  const gPrev = sClosest[sClosest.length-1],
+  g = groups.shift()
+
+  if (gPrev)
+}
+
+function doNegateOverlaps(groups, sequences, negate) {
+  const sLast = sequences[sequences.length-1]
+
+  const gPrev = sLast[sLast.length-1],
+  g = groups.shift()
+
+
+}
+*/
+
 module.exports = {
+  negateOverlaps, doNegateOverlaps, cascadeGroup,
   formGroupsAll, formGroupsAllHomo,
 
   fillSpace, fillSchema, formSideByOrderedSchema,
 
-  createSchemaPermutations, permutationsToCombinations,
-  isRatioEqual, sortItemsByType, getSize,
-
   formGroups,
-  GroupsByItem,
 
   t: require('./test-helpers'),
 }
