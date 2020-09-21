@@ -137,3 +137,43 @@ Start with a subset of items from a given sequence. Given the number of slots to
 */
 `
 -->
+
+<!--
+```js
+/**
+  itemSchemas: {anyOf: [1, 2]} // amount of space an item can take
+    (e.g., there can be two types of items: one that takes 1 slot of space
+    and one that takes 2 slots of space)
+  // groupSchemas: {
+  //   s: {anyOf: [[2]]},
+  //   m: {anyOf: [[1,1,1], [1,2]},
+  //   l: {anyOf: [1,1,1,1,1], [2,2], [1,1,2]}
+  // }
+
+  +++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  // the variants are listed in the order of their priority
+  // (e.g., ideally, we want the sequence to be broken into [1,2] and [1,1,1] groups.
+  // If that's not feasible, we will first consider [2], [1,1,2]. Then if that
+  // doesn't solve the problem, we're going to turn to [2,2], [1,1,1,1,1]
+  // ) * the formGroup sketch is intended to implement this
+
+  // * another version of priorities: [2] and [1,1,1]; [1,2], [1,1,2]; [2,2], [1,1,1,1,1];
+
+  // order of items in each of the variants doesnt matter
+  groupSchemas: {anyOf: [
+    [2], [1,1,1], [1,2], [1,1,2], [2,2], [1,1,1,1,1]
+    // [1,2], [1,1,1], [2], [1,1,2], [2,2], [1,1,1,1,1]
+  ]}
+
+  Note: I could generate all possible permutations of these schemas;
+  all possible permutations of the order of their priority...
+  I'd have to have possible item types given apriori (e.g., [1, 2]);
+  min and max space for a group to take...
+  See formAllSequences
+  +++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  OR
+  groupSizes: [2, 3, 4, 5]
+  e.g., 2: [2]; 3: [1,1,1], [1,2]; 4: [1,1,2], [2,2]; 5: [1,1,1,1,1]
+*/
+```
+-->
