@@ -87,6 +87,9 @@ function isRatioEqual(a, b) {
   return done
 }
 
+/**
+  @param {[Int]} items
+*/
 function sortItemsByType(items) {
   return items.reduce((topology, v, i) => {
     if (topology.has(v)) {
@@ -105,7 +108,6 @@ function getSize(sequence) {
 
 /**
   @param {Subsequence} a, b
-  // this hasn't been run
 */
 function overlaps(a, b) {
   const _a = a.s.map((item, i) => a.i+i),
@@ -156,6 +158,13 @@ function overlaps(a, b) {
 function isAdjacent(a, b) {
   return b[0] - a[a.length-1] === 1
     || a[0] - b[b.length-1] === 1
+}
+
+class Item {
+  constructor(space) {
+    if (!Number.isInteger(space) || space < 1) throw new Error("space must be an integer, greater than 0")
+    this.space = space
+  }
 }
 
 module.exports = {

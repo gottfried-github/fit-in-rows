@@ -1,5 +1,5 @@
 const {doRecursivelyIterate, makeRecursivelyIterate} = require('recursion-and-discrete-math')
-const {sortItemsBySpace} = require('./helpers')
+const {Item, sortItemsBySpace} = require('./helpers')
 
 function randomBinaryProportionateSeq(n, w) {
   const sN = []; sN.length = n; sN.fill(0)
@@ -12,13 +12,6 @@ function randomBinaryProportionateSeq(n, w) {
   }
 
   return s
-}
-
-class Item {
-  constructor(space) {
-    if (!Number.isInteger(space) || space < 1) throw new Error("space must be an integer, greater than 0")
-    this.space = space
-  }
 }
 
 function randomBinaryProportionateSeqSecond(n, w, nSpace, wSpace) {
