@@ -107,21 +107,40 @@ function getSize(sequence) {
 }
 
 /**
-  @param {Subsequence} a, b
+  @param {Subsequence} a, @param {Subsequence} b
 */
 function overlaps(a, b) {
-  const _a = a.s.map((item, i) => a.i+i),
-  _b = b.s.map((item, i) => b.i+i)
+  const bIs = b.items.map((item, i) => b.i+i)
 
-  let i = 0, l = a.s.length
+  let i = 0, l = a.items.length
   for (i; i<l; i++) {
-    if (_b.includes(_a[i])) return true
+    if (bIs.includes(a.i+i)) return true
   }
 
   return false
 }
 
 /*
+@param {Subsequence} a, b
+function overlaps(a, b) {
+  return doOverlaps(
+    a.items.map((item, i) => a.i+i)
+    b.items.map((item, i) => b.i+i)
+  )
+}
+
+  @param {[Int]} a, @param {[Int]} b
+    where Int is the position of the respective item in the source `sequence`
+function doOverlaps(a, b) {
+  let i = 0, l = a.length
+  for (i; i<l; i++) {
+    if (b.includes(a[i])) return true
+  }
+
+  return false
+}
+
+
 @param {[Int, Int, ...]} a, b
 function overlaps(a, b) {
   const overlap = []
@@ -160,10 +179,50 @@ function isAdjacent(a, b) {
     || a[0] - b[b.length-1] === 1
 }
 
+/*
 class Item {
   constructor(space) {
     if (!Number.isInteger(space) || space < 1) throw new Error("space must be an integer, greater than 0")
     this.space = space
+  }
+}
+*/
+
+function clone(arr) {
+  return arr.map(i => i)
+}
+
+/**
+  @param {[Int]} items Int represents the space the item takes, in units of space
+  @param {[Int || [Int]]} delta space left after trying to fill the subsequence with items
+    || a piece of schema, left after trying to fill the subsequence with items
+  @param {Boolean} reached whether a condition has been met, which makes it impossible to
+    fill the `subsequence` with subsequent items from the source `sequence`
+  @param {Int} location
+*/
+class Subsequence {
+  constructor(items, delta, reached, location) {
+    if ('boolean' !== typeof(reached)) throw new Error("reached must be a boolean")
+
+    this.items = items
+    this.delta = delta
+    this.reached = reached
+
+    this._location = "number" === typeof(location) || null
+  }
+
+  set location(l) {
+    if (null !== this._location) throw new Error("location already set and cant be changed")
+  }
+
+  get location() {
+    return this._location
+  }
+
+  isDeltaEmpty() {
+    return Array.isArray(this.delta)
+      ? 0 === this.delta.length
+      : 0 === this.delta
   }
 }
 
@@ -172,4 +231,6 @@ module.exports = {
   getSize, isRatioEqual,
   overlaps, isAdjacent,
   sortItemsByType,
+  Subsequence,
+  clone
 }
