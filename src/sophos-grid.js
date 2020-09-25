@@ -17,63 +17,99 @@ function formAllSequences(itemTypes, groupSize) {
 }
 */
 
-function formGroupsAll(space, sequence) {
+/**
+  It's assumed here, that each subsequent group in groups
+  is situated further in the sequence of items by at least
+  one item (see Notes.Subsequences)
+*/
+function negateOverlaps(subSs) {
+  return doNegateOverlaps(subSs, [], doNegateOverlaps)
+}
+
+function doNegateOverlaps(subSs, sequences, negate) {
+  if (0 === subSs.length) return sequences
+
+  return negate(subSs,
+    cascadeSubsequence(subSs.shift(), sequences, cascadeSubsequence), negate
+  )
+}
+
+function cascadeSubsequence(subS, sequences, cascade) {
+  if (0 === sequences.length) return [[subS]]
+
+  if (!overlaps(sequences[0][sequences[0].length-1], subS)) {
+    sequences[0].push(subS)
+    return sequences
+  }
+
+  const s = sequences.shift()
+  return [s, ...cascade(subS, sequences, cascade)]
+}
+
+/**
+  @param {[Int || [Int]]} space array of @space params to pass to formHomogeneousSubsequences
+  @param {Sequence} sequence (see $Sequence in notes.md)
+*/
+function formSubsequences(space, sequence) {
   return space.reduce((bySpace, space) => {
-    bySpace.push(formGroupsAllHomo(space, sequence.map(i => i)))
+    bySpace.push(formHomogeneousSubsequences(space, clone(sequence)))
     return bySpace
   }, [])
 }
 
 /**
   @param {Int || [Int]} space space to fill (either a number or a schema)
+  @param {Sequence} sequence (see $Sequence in notes.md)
 */
-function formGroupsAllHomo(space, sequence) {
-  const isSchema = Array.isArray(space),
-  fill = (isSchema) ? fillSchema : fillSpace,
-  l = sequence.length
+function formHomogeneousSubsequences(space, sequence) {
+  const subSs = []
 
-  const gs = [], gsMap = []
-
+  const len = sequence.length
   while (sequence.length>0) {
-    const g = fill(space.map(i => i), sequence.map(i => i), [], fill)
+    const data = Array.isArray(space)
+      ? fillSchema(clone(space), clone(sequence), [], fillSchema)
+      : fillSpace(clone(space), clone(sequence), [], fillSpace)
 
-    const d = isSchema ? g.d.length : g.d
-    g.i = l - sequence.length
-
-    if (0 === d) gs.push(g)
+    const subS = new Subsequence(...[...data, len - sequence.length])
+    if (subS.isDeltaEmpty()) subSs.push(subS)
 
     sequence.shift()
   }
 
-  return gs
+  return subSs
 }
 
+/**
+  @param {Sequence} sSrc (see $Sequence in notes.md)
+*/
 function fillSpace(d, sSrc, s, fill) {
-  if (sSrc.length === 0) return {s, d, reachedLimit: true}
+  if (sSrc.length === 0) return [s, d, true]
 
-  const item = sSrc.shift()
-  const dNew = d - item.space
+  const itemSpace = sSrc.shift()
+  const dNew = d - itemSpace
 
-  if (dNew < 0) return {s, d, reachedLimit: true}
+  if (dNew < 0) return [s, d, true]
 
-  s.push(item)
+  s.push(itemSpace)
 
-  if (0 === dNew) return {s, d: dNew, reachedLimit: false}
+  if (0 === dNew) return [s, dNew, false]
+
   return fill(dNew, sSrc, s, fill)
 }
 
+/**
+  @param {Sequence} sSrc (see $Sequence in notes.md)
+*/
 function fillSchema(d, sSrc, s, fill) {
-  if (sSrc.length === 0) return {s, d, reachedLimit: true}
+  if (sSrc.length === 0) return [s, d, true]
 
-  const item = sSrc.shift()
-  if (!d.includes(item.space)) return {
-    s, d, reachedLimit: true
-  }
+  const itemSpace = sSrc.shift()
+  if (!d.includes(itemSpace)) return [s, d, true]
 
-  d.splice(d.indexOf(item.space), 1)
-  s.push(item)
+  d.splice(d.indexOf(itemSpace), 1)
+  s.push(itemSpace)
 
-  if (d.length === 0) return {s, d, reachedLimit: false}
+  if (d.length === 0) return [s, d, false]
   return fill(d, sSrc, s, fill)
 }
 
@@ -94,35 +130,6 @@ function formSideByOrderedSchema(schema, sSrc, s, formSide) {
   return formSide(schema, sSrc, s, formSide)
 }
 */
-
-/**
-  It's assumed here, that each subsequent group in groups
-  is situated further in the sequence of items by at least
-  one item (see Notes.Subsequences)
-*/
-function negateOverlaps(groups) {
-  return doNegateOverlaps(groups, [], doNegateOverlaps)
-}
-
-function doNegateOverlaps(groups, sequences, negate) {
-  if (0 === groups.length) return sequences
-
-  return negate(groups,
-    cascadeGroup(groups.shift(), sequences, cascadeGroup), negate
-  )
-}
-
-function cascadeGroup(g, sequences, cascade) {
-  if (0 === sequences.length) return [[g]]
-
-  if (!overlaps(sequences[0][sequences[0].length-1], g)) {
-    sequences[0].push(g)
-    return sequences
-  }
-
-  const s = sequences.shift()
-  return [s, ...cascade(g, sequences, cascade)]
-}
 
 module.exports = {
   negateOverlaps, doNegateOverlaps, cascadeGroup,

@@ -1,11 +1,19 @@
 # Notes
 
-## Sequence
-A sequence of `items`
+## Space
+Defined by number of units (e.g., *2* is *two* units of space).
 
-## Subsequence (group)
-A mapping onto a `sequence`.
-Given the first `item` in the `susequence`, that `item`'s index in the `sequence` is the `location` of the `subsequence`
+## Sequence
+A sequence of `space` specifications.
+
+## Subsequence
+A subsequence of a `sequence`. It's formed by specifying the amount of `space` and trying to fill that amount by taking consequent items of `space` from the `sequence`. \*
+
+\* There could be different mechanisms for evaluating whether each such item can be used to fill the `space` in the `subsequence` (I might add their description later in these notes-docs). \*1
+
+\*1 From these mechanisms also follows the way `reached` is determined (also, the eventual value of `delta` follows from that).
+
+`location` is the index of the `subsequence`'s first item, as it appears in the `sequence` (e.g., for `sequence: [0,1,2,3]` and `subsequence: [1,2]`, the `location` of the subsequence is *1*)
 
 ## Subsequences (groups)
 Each subsequent `subsequence` in `subsequences` is `located` further in the `sequence` by at least *one* `item`.
@@ -13,9 +21,9 @@ Each subsequent `subsequence` in `subsequences` is `located` further in the `seq
 
 ## fillSpace and fillSchema
 The core logic in both fillSpace (formGroupBySpace) and fillSchema (formGroupBySchema) is the same, thus it might be better to put it in a single place. `fillSpace` does that.
-The equivalent would be to use `fillSpace` for space and `fillSchema` for for schema.
+The equivalent would be to use `fillSpace` for space and `fillSchema` for schema.
 These are equivalence pairs between conditions in `fillSpace` and `fillSchema` (in the sense that they return semantically equivalent values (?)):
-`spaceLeftNew < 0`, `!schema.includes(item.space)`
+`spaceLeftNew < 0`, `!schema.includes(itemSpace)`
 `0 === spaceLeftNew`, `schema.length === 0`
 The order in which these are checked is the same in both `fillSchema` and `fillSpace`
 
