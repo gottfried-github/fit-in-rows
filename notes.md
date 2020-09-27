@@ -9,11 +9,15 @@ A sequence of `space` specifications.
 ## Subsequence
 A subsequence of a `sequence`. It's formed by specifying the amount of `space` and trying to fill that amount by taking consequent items of `space` from the `sequence`. \*
 
-\* There could be different mechanisms for evaluating whether each such item can be used to fill the `space` in the `subsequence` (I might add their description later in these notes-docs). \*1
+\* There could be different mechanisms for evaluating whether each such item can be used to fill the `space` in the `subsequence` (I might add their description later in these notes-docs \*2). \*1
 
 \*1 From these mechanisms also follows the way `reached` is determined (also, the eventual value of `delta` follows from that).
 
 `location` is the index of the `subsequence`'s first item, as it appears in the `sequence` (e.g., for `sequence: [0,1,2,3]` and `subsequence: [1,2]`, the `location` of the subsequence is *1*)
+
+`space to fill` may be represented
+
+\*2 `fillSchema` is a more specific case of `fillSpace` (?), wherein `schema` represents not only the total amount of space that needs to be filled, but (certain characteristics of) a structure that the filling items should comprise. Particularly (more specifically), it specifies what items in the subsequence-to-be should take up how much space. The order in which the items occur doesn't matter, but for each item, specified in the schema there should be a match (in terms of the amount of space it takes) in the subsequence
 
 ## Subsequences (groups)
 Each subsequent `subsequence` in `subsequences` is `located` further in the `sequence` by at least *one* `item`.
