@@ -68,33 +68,38 @@ function formHomogeneousSubsequences(space, sequence) {
 
   const len = sequence.length
   while (sequence.length>0) {
-    const data = Array.isArray(space)
-      ? fillSchema(clone(space), clone(sequence), [], fillSchema)
-      : fillSpace(clone(space), clone(sequence), [], fillSpace)
+    const subS = formSubsequence(space, sequence)
 
-    const subS = new Subsequence(...[...data, len - sequence.length])
     if (subS.isDeltaEmpty()) subSs.push(subS)
-
     sequence.shift()
   }
 
   return subSs
 }
 
+function formSubsequence(space, sequence) {
+  return new Subsequence(
+    space, Array.isArray(space)
+      ? fillSchema(clone(space), clone(sequence), [], fillSchema)
+      : fillSpace(clone(space), clone(sequence), [], fillSpace),
+    len - sequence.length
+  )
+}
+
 /**
   @param {Sequence} sSrc (see $Sequence in notes.md)
 */
 function fillSpace(d, sSrc, s, fill) {
-  if (sSrc.length === 0) return [s, d, true]
+  if (sSrc.length === 0) return s
 
   const itemSpace = sSrc.shift()
   const dNew = d - itemSpace
 
-  if (dNew < 0) return [s, d, true]
+  if (dNew < 0) return s
 
   s.push(itemSpace)
 
-  if (0 === dNew) return [s, dNew, false]
+  if (0 === dNew) return s
 
   return fill(dNew, sSrc, s, fill)
 }
@@ -103,15 +108,15 @@ function fillSpace(d, sSrc, s, fill) {
   @param {Sequence} sSrc (see $Sequence in notes.md)
 */
 function fillSchema(d, sSrc, s, fill) {
-  if (sSrc.length === 0) return [s, d, true]
+  if (sSrc.length === 0) return s
 
   const itemSpace = sSrc.shift()
-  if (!d.includes(itemSpace)) return [s, d, true]
+  if (!d.includes(itemSpace)) return s
 
   d.splice(d.indexOf(itemSpace), 1)
   s.push(itemSpace)
 
-  if (d.length === 0) return [s, d, false]
+  if (d.length === 0) return s
   return fill(d, sSrc, s, fill)
 }
 

@@ -7,7 +7,7 @@ Defined by number of units (e.g., *2* is *two* units of space).
 A sequence of `space` specifications.
 
 ## Subsequence refactor
-`Subsequence` is meant for storing the data about a subsequence in a human(coder)-readable way. It describes properties of an existing `subsequence`. It doesn't describe how to build one. Neither does it store the `sequence`, of which it's a `subsequence`.
+`Subsequence` is meant for storing the data (or, I suppose, I might say - metadata) about a `subsequence` in a human(coder)-readable way. It describes properties of an existing `subsequence`. It doesn't describe how to build one. Neither does it store the `sequence`, of which it's a `subsequence`.
 
 What I'm trying to do here is to find a good way of speaking about the concept of the `subsequence` computationally. To have something that from looking at the code gives you a good idea about the concept itself (describes it).
 
