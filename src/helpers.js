@@ -88,7 +88,7 @@ function isRatioEqual(a, b) {
 }
 
 /**
-  @param {[Int]} items
+  @param {[Item]} items $Item
 */
 function sortItemsByType(items) {
   return items.reduce((topology, v, i) => {
@@ -102,6 +102,9 @@ function sortItemsByType(items) {
   }, new Map())
 }
 
+/**
+  @param {Sequence} sequence $Sequence
+*/
 function getSize(sequence) {
   return sequence.reduce((sum, i) => sum+i, 0)
 }
@@ -190,40 +193,6 @@ class Item {
 
 function clone(arr) {
   return arr.map(i => i)
-}
-
-/**
-  @param {[Int]} items Int represents the space the item takes, in units of space
-  @param {[Int || [Int]]} delta space left after trying to fill the subsequence with items
-    || a piece of schema, left after trying to fill the subsequence with items
-  @param {Boolean} reached whether a condition has been met, which makes it impossible to
-    fill the `subsequence` with subsequent items from the source `sequence`
-  @param {Int} location
-*/
-class Subsequence {
-  constructor(items, delta, reached, location) {
-    if ('boolean' !== typeof(reached)) throw new Error("reached must be a boolean")
-
-    this.items = items
-    this.delta = delta
-    this.reached = reached
-
-    this._location = "number" === typeof(location) || null
-  }
-
-  set location(l) {
-    if (null !== this._location) throw new Error("location already set and cant be changed")
-  }
-
-  get location() {
-    return this._location
-  }
-
-  isDeltaEmpty() {
-    return Array.isArray(this.delta)
-      ? 0 === this.delta.length
-      : 0 === this.delta
-  }
 }
 
 module.exports = {

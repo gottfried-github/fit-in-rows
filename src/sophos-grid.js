@@ -1,5 +1,7 @@
 const {randomBinaryProportionateSeqSecond} = require('./test-helpers')
-const {permutationsToCombinations, getSize, isRatioEqual, overlaps, isAdjacent, sortItemsByType} = require('./helpers')
+const {permutationsToCombinations, getSize, isRatioEqual, sortItemsByType, clone,
+  overlaps, isAdjacent, Subsequence,
+} = require('./helpers')
 
 /**
 function main(groupSchemas) {
@@ -131,13 +133,83 @@ function formSideByOrderedSchema(schema, sSrc, s, formSide) {
 }
 */
 
+/**
+  @param {$Space || $Schema} spaceToFill
+*/
+class Subsequence {
+  constructor(spaceToFill, items, location) {
+    this._spaceToFill = spaceToFill
+    this.items = items
+    this.location = location
+  }
+
+  get delta() {
+    return (this._spaceToFill.isArray())
+      ? this._spaceToFill.reduce((d, i) => {
+        return (items.includes(i)) ? false : i
+      }, [])
+      : this._spaceToFill - this.size
+  }
+
+  set delta() {
+    throw new Error("delta is read-only")
+  }
+
+  get size() {
+    return this.items.reduce((sum, i) => sum+i, 0)
+  }
+
+  set size() {
+    throw new Error("size is read-only")
+  }
+
+  isDeltaEmpty() {
+    return Array.isArray(this.delta)
+      ? 0 === this.delta.length
+      : 0 === this.delta
+  }
+}
+
+/**
+  @param {[Int]} items Int represents the space the item takes, in units of space
+  @param {[Int || [Int]]} delta space left after trying to fill the subsequence with items
+    || a piece of schema, left after trying to fill the subsequence with items
+  @param {Boolean} reached whether a condition has been met, which makes it impossible to
+    fill the `subsequence` with subsequent items from the source `sequence`
+  @param {Int} location
+
+  class Subsequence {
+    constructor(items, delta, reached, location) {
+      if ('boolean' !== typeof(reached)) throw new Error("reached must be a boolean")
+
+      this.items = items
+      this.delta = delta
+      this.reached = reached
+
+      this._location = "number" === typeof(location) || null
+    }
+
+    set location(l) {
+      if (null !== this._location) throw new Error("location already set and cant be changed")
+    }
+
+    get location() {
+      return this._location
+    }
+
+    isDeltaEmpty() {
+      return Array.isArray(this.delta)
+        ? 0 === this.delta.length
+        : 0 === this.delta
+    }
+  }
+*/
+
 module.exports = {
-  negateOverlaps, doNegateOverlaps, cascadeGroup,
-  formGroupsAll, formGroupsAllHomo,
+  negateOverlaps, doNegateOverlaps, cascadeSubsequence,
+  formSubsequences, formHomogeneousSubsequences,
 
-  fillSpace, fillSchema, formSideByOrderedSchema,
-
-  formGroups,
+  fillSpace, fillSchema, // formSideByOrderedSchema,
 
   t: require('./test-helpers'),
 }
