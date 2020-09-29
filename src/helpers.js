@@ -200,6 +200,5 @@ module.exports = {
   getSize, isRatioEqual,
   overlaps, isAdjacent,
   sortItemsByType,
-  Subsequence,
   clone
 }

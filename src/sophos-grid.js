@@ -1,6 +1,6 @@
 const {randomBinaryProportionateSeqSecond} = require('./test-helpers')
 const {permutationsToCombinations, getSize, isRatioEqual, sortItemsByType, clone,
-  overlaps, isAdjacent, Subsequence,
+  overlaps, isAdjacent,
 } = require('./helpers')
 
 /**
@@ -23,6 +23,8 @@ function formAllSequences(itemTypes, groupSize) {
   It's assumed here, that each subsequent group in groups
   is situated further in the sequence of items by at least
   one item (see Notes.Subsequences)
+
+  This has been only tried on homogeneous subsequences
 */
 function negateOverlaps(subSs) {
   return doNegateOverlaps(subSs, [], doNegateOverlaps)
@@ -69,6 +71,7 @@ function formHomogeneousSubsequences(space, sequence) {
   const len = sequence.length
   while (sequence.length>0) {
     const subS = formSubsequence(space, sequence)
+    subS.location = len - sequence.length
 
     if (subS.isDeltaEmpty()) subSs.push(subS)
     sequence.shift()
@@ -82,7 +85,6 @@ function formSubsequence(space, sequence) {
     space, Array.isArray(space)
       ? fillSchema(clone(space), clone(sequence), [], fillSchema)
       : fillSpace(clone(space), clone(sequence), [], fillSpace),
-    len - sequence.length
   )
 }
 
@@ -145,18 +147,18 @@ class Subsequence {
   constructor(spaceToFill, items, location) {
     this._spaceToFill = spaceToFill
     this.items = items
-    this.location = location
   }
 
   get delta() {
-    return (this._spaceToFill.isArray())
+    return (Array.isArray(this._spaceToFill))
       ? this._spaceToFill.reduce((d, i) => {
-        return (items.includes(i)) ? false : i
+        if (this.items.includes(i)) return d
+        d.push(i); return d
       }, [])
       : this._spaceToFill - this.size
   }
 
-  set delta() {
+  set delta(x) {
     throw new Error("delta is read-only")
   }
 
@@ -164,7 +166,7 @@ class Subsequence {
     return this.items.reduce((sum, i) => sum+i, 0)
   }
 
-  set size() {
+  set size(x) {
     throw new Error("size is read-only")
   }
 
@@ -214,7 +216,9 @@ module.exports = {
   negateOverlaps, doNegateOverlaps, cascadeSubsequence,
   formSubsequences, formHomogeneousSubsequences,
 
-  fillSpace, fillSchema, // formSideByOrderedSchema,
+  formSubsequence,
+  fillSpace, fillSchema,
 
+  Subsequence,
   t: require('./test-helpers'),
 }

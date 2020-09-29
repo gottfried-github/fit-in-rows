@@ -1,7 +1,7 @@
 const {doRecursivelyIterate, makeRecursivelyIterate} = require('recursion-and-discrete-math')
 const {Item} = require('./helpers')
 
-function randomBinaryProportionateSeq(n, w) {
+function randomBinaryProportionateSeq(n, w, nSpace, wSpace) {
   const sN = []; sN.length = n; sN.fill(0)
   const sW = []; sW.length = w; sW.fill(1)
   const _s = sN.concat(sW);
@@ -11,7 +11,7 @@ function randomBinaryProportionateSeq(n, w) {
     s.push(_s.splice(randomBetween(0, _s.length-1), 1)[0])
   }
 
-  return s
+  return s.map((i) => (i === 0) ? nSpace : wSpace)
 }
 
 function randomBinaryProportionateSeqSecond(n, w, nSpace, wSpace) {
