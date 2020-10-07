@@ -1,98 +1,101 @@
-/**
-  @param {[0 || 1, ...]} arr
-*/
-function makeSeq(arr) {
-  return new Proxy(arr, {
-    get(t, p, r) {
-      if ("w" === p) {
-        let w = 0
-        t.forEach(i => {if (i === 1) {w++}})
-        return w
-      } else if ("n" === p) {
-        let n = 0
-        t.forEach(i => {if (i === 0) {n++}})
-        return n
-      } else if ("ratio" === p) {
-        return r.n / r.w
-      } else if ('ratioMax' === p) {
-        return (t.length-1) / 1 
-      } else if ('ratioMin' === p) {
-        return 1 / (t.length-1)
-      } else if ('splice' === p) {
-        // @param {{v: (the value of what to pass to splice)} || null (if not to pass anything)} items
-        return (start, n, items) => {
-          return (items)
-            ? makeSeq(t.splice(start, n, items.v))
-            : makeSeq(t.splice(start, n))
-          }
-      } else {
-        return t[p]
-      }
-    }, set() {}
-  })
-}
+class GroupsByItem {
+  constructor() {
+    this.items = new Map()
+  }
 
-function splitIntoChunks() {
+  push(i, ...groups) {
+    if (this.items.has(i)) {
+      this.items.get(i).push(...groups)
+    } else {
+      this.items.set(i, [...groups])
+    }
 
-}
+    // this.items.push(new ItemGroups(i, groups))
+  }
 
-function scan(seq) {
+  toArray() {
+    const itemsArr = []
+    console.log(this.items)
+    for (var [k,v] of this.items.entries()) {
+      // console.log(k,v)
+      itemsArr.push({i: k, gs: v})
+    }
 
-}
-
-/**
-  @param {Number} step in terms of a fraction of the length of the seq, by which
-  to calibrate the cut of the sequence, based on compared ratios of narrow items to wide, in the two parts
-*/
-function doIterate(seq, step, initialRatio) {
-  const ratio = seq.ratio
-  let [subseqL, subseqR] = [seq, seq.splice(0, Math.round(seq.length/2))]
-
-  // if (0 === subseqL.ratio || Infinity === subseqL.ratio)
-  //   then it's a dense sequence, and we can throw it away (not deal with it in this method)
-
-  // return new Set([
-  //   {ratio: subseqL.ratio, w: subseqL.w, n: subseqL.n},
-  //   {ratio: subseqR.ratio, w: subseqR.w, n: subseqR.n}
-  // ])
-
-  // return [ratio, subseqL.ratio, subseqR.ratio]
-  return {subseqL, subseqR}
-}
-
-function iterate(seq) {
-  return doIterate(seq, initialRatio)
-}
-
-/*
-  @param {[0 || 1, ...]} seq
-function calculate(seq) { // calculateRatio
-  let w = 0, n = 0
-  seq.forEach(i => (i === 1)
-    ? w++ : n++
-  )
-
-  return {w, n}
-}
-
-@param {Array, such that arr.length is even} seq
-function analyze(seq) {
-  let [subseq0, subseq1] = [seq, seq.splice(0, seq.length/2)]
-
-  return {
-    subseq0: analyzeSubseq(subseq0),
-    subseq1: analyzeSubseq(subseq1)
+    return itemsArr
   }
 }
 
-function analyzeSubseq(seq) {
-  const res = calculate(seq)
-  res.ratio = res.w / res.n
-  return res
+function formGroups(space, s, items) {
+  const groupsByItem = new GroupsByItem()
+  items.forEach(i => {
+    groupsByItem.push(i, formGroup(space, i, s))
+  })
+
+  return groupsByItem.toArray()
 }
-*/
+
+function formGroup(space, i, s) {
+  space -= s[i].space
+
+  if (space <= 0) {
+    return {
+      g: [i], spaceLeft: space,
+      reachedLeftLimit: true, reachedRightLimit: true,
+    }
+  }
+
+  const gAfter = doFormGroup(1, space, i, s, [])
+  console.log('formGroup, gAfter', gAfter)
+
+  if (gAfter.spaceLeft === 0) {
+    // gAfter.g.metFloor = false
+    // gAfter.g.metCeiling = !!gAfter.reached
+    return {
+      g: [i].concat(gAfter.g),
+      spaceLeft: gAfter.spaceLeft,
+      reachedLeftLimit: false,
+      reachedRightLimit: !!gAfter.reached
+    }
+  }
+
+  const gBefore = doFormGroup(-1, gAfter.spaceLeft, i, s, [])
+  console.log('formGroup, gBefore', gBefore)
+
+  return {
+    g: gBefore.g.concat([i].concat(gAfter.g)),
+    spaceLeft: gBefore.spaceLeft,
+    reachedRightLimit: gAfter.reached,
+    reachedLeftLimit: gBefore.reached
+  }
+}
+
+function doFormGroup(d, spaceLeft, i, s, g) {
+  if (i+d > s.length-1 || i+d < 0) {
+    // $Group.Reaching-Limit.3
+    // console.log('doFormGroup, i+d > s.length-1 || i+d < 0');
+    return {reached: true, spaceLeft, g}
+  }
+
+  console.log('doFormGroup, d, spaceLeft, i', d, spaceLeft, i)
+  console.log('doFormGroup, i+d, s[i+d].space', i+d, s[i+d].space)
+  const spaceLeftNew = spaceLeft - s[i+d].space
+  // console.log('doFormGroup, spaceLeftNew', spaceLeftNew);
+
+  if (spaceLeftNew > 0) {
+    (d > 0) ? g.push(i+d) : g.unshift(i+d);
+    (d > 0) ? d++ : d--;
+
+    return doFormGroup(d, spaceLeftNew, i, s, g)
+  } else if (spaceLeftNew === 0) {
+    (d > 0) ? g.push(i+d) : g.unshift(i+d)
+    return {g, spaceLeft: spaceLeftNew}
+  } else {
+    // $Group.Reaching-Limit.2
+    return {reached: true, spaceLeft, g}
+  }
+}
 
 module.exports = {
-  // calculate, analyze,
-  makeSeq, iterate, doIterate
+  formGroup, doFormGroup, formGroups,
+  GroupsByItem,
 }

@@ -1,70 +1,64 @@
-function randomBinarySequence(l) {
-  const arr = []
-  while (l >= 0) {
-    arr.push(Math.round(Math.random()))
-    l--
-  }
-
-  return arr
-}
-
-function compare(a, b) {
-  let lastRepeated = false
-  const repeats = []
-
-  a.forEach((v, i) => {
-    if (b[i] === v) {
-      if (lastRepeated) {
-        repeats[0].push(v)
-      } else {
-        const repeat = []; repeat.start = i
-        repeat.push(v)
-        repeats.unshift(repeat)
-        lastRepeated = true
-      }
+function sortItemsBySpace(sequence) {
+  return sequence.reduce((topology, v, i) => {
+    if (topology.has(v.space)) {
+      topology.get(v.space).push(i)
     } else {
-      lastRepeated = false
+      topology.set(v.space, [i])
     }
-  })
 
-  let totalLength = 0
-  repeats.forEach(i => totalLength += i.length)
-
-  repeats.reverse()
-  return {totalLength, repeats}
-  // return repeats
+    return topology
+  }, new Map())
 }
 
-function crossCompare(sequences) {
-  // let i = sequences.length-1
+function countItems(sequence) {
+  return sequence.reduce((itemsCount, i) => {
+    if (i === 0) { itemsCount.n++ }
+    else if (i === 1) { itemsCount.w++ }
+    else { throw new Error("i must be either 0 or 1")}
 
+    return itemsCount
+  }, {n: 0, w: 0})
 }
 
-function randomBinarySequences(l, n) {
-  const sequences = []
-  while(n >= 0) {
-    const sequence = randomBinarySequence(l)
+/**
+  @param {Array} g a group, produced by maximizeGroupsDifference
+*/
+function isDenseGroup(g) {
+  if (g.length <= 1) return null
 
-    sequences.push(sequence); n--
-    // compare the generated sequence against all other sequences to make sure
-    // they're not too similar (the problem is, given the binary range, there's going to be a lot of similar pieces)
-    // if (!sequences.length) {
-    //   sequences.push(sequence); n--; continue
-    // }
-
-    // const similarities = []
-    // sequences.forEach((v, i) => {
-    //   similarities.push({comparee: i, totalLength: compare(v, sequence).totalLength})
-    // })
-  }
-
-  return sequences
+  return (g.length <= 1)
+    ? null
+    : (g[0] === g[1]) ? true
+    : false
 }
 
-function logPretty(sequence) {
-  return sequence.toString()
+function maximizeGroupsDifference(seq) {
+  return seq.reduce((groups, v) => {
+    if (groups.length === 1 && groups[groups.length-1].length === 0) {
+      groups[groups.length-1].push(v)
+      return groups
+    }
+
+    const lastGroup = groups[groups.length-1]
+    const last = lastGroup[lastGroup.length-1]
+    const secondToLast = lastGroup[lastGroup.length-2]
+
+    if (secondToLast === undefined ||
+      v === last && secondToLast === last ||
+      v !== last && secondToLast !== last
+    ) {lastGroup.push(v)} else if (
+      v === last && secondToLast !== last
+    ) {groups.push([lastGroup.pop(), v])} else if (
+      v !== last && secondToLast === last
+    ) {
+      groups.push([v])
+    }
+
+    return groups
+  }, [[]])
 }
 
 module.exports = {
-  randomBinarySequence, randomBinarySequences, compare, logPretty
+  maximizeGroupsDifference,
+  sortItemsBySpace, countItems,
 }
