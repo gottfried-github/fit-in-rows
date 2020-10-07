@@ -113,11 +113,11 @@ function getSize(sequence) {
   @param {Subsequence} a, @param {Subsequence} b
 */
 function overlaps(a, b) {
-  const bIs = b.items.map((item, i) => b.i+i)
+  const bIs = b.items.map((item, i) => b.location+i)
 
   let i = 0, l = a.items.length
   for (i; i<l; i++) {
-    if (bIs.includes(a.i+i)) return true
+    if (bIs.includes(a.location+i)) return true
   }
 
   return false

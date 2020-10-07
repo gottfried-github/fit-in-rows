@@ -83,8 +83,8 @@ function formHomogeneousSubsequences(space, sequence) {
 function formSubsequence(space, sequence) {
   return new Subsequence(
     space, Array.isArray(space)
-      ? fillSchema(clone(space), clone(sequence), [], fillSchema)
-      : fillSpace(clone(space), clone(sequence), [], fillSpace),
+      ? fillSchema([...space], [...sequence], [], fillSchema)
+      : fillSpace(space, [...sequence], [], fillSpace),
   )
 }
 

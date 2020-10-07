@@ -1,5 +1,9 @@
 # Notes
 
+# /
+Right now, methods that need to have the information about the location of `items` of a `subsequence` in the `sequence` (like `overlaps`) rely on the `location` property of a `Subsequence`. This property, right now is not intrinsic to `Subsequence` but is set by the method, which processes the entire `sequence` to produce `subsequences` (right now it is the `formHomogeneousSubsequences`).
+It may be better to have a `subsequence` be represented by the indices of the comprising `item`s, where each index would point to the respective `item`'s location in the `sequence`.
+
 ## Space
 Defined by number of units (e.g., *2* is *two* units of space).
 
