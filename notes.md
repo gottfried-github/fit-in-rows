@@ -1,11 +1,35 @@
 # Notes
 
-## Sequence
-A sequence of `items`
+# /
+Right now, methods that need to have the information about the location of `items` of a `subsequence` in the `sequence` (like `overlaps`) rely on the `location` property of a `Subsequence`. This property, right now is not intrinsic to `Subsequence` but is set by the method, which processes the entire `sequence` to produce `subsequences` (right now it is the `formHomogeneousSubsequences`).
+It may be better to have a `subsequence` be represented by the indices of the comprising `item`s, where each index would point to the respective `item`'s location in the `sequence`.
 
-## Subsequence (group)
-A mapping onto a `sequence`.
-Given the first `item` in the `susequence`, that `item`'s index in the `sequence` is the `location` of the `subsequence`
+## Space
+Defined by number of units (e.g., *2* is *two* units of space).
+
+## Sequence
+A sequence of `space` specifications.
+
+## Subsequence refactor
+`Subsequence` is meant for storing the data (or, I suppose, I might say - metadata) about a `subsequence` in a human(coder)-readable way. It describes properties of an existing `subsequence`. It doesn't describe how to build one. Neither does it store the `sequence`, of which it's a `subsequence`.
+
+What I'm trying to do here is to find a good way of speaking about the concept of the `subsequence` computationally. To have something that from looking at the code gives you a good idea about the concept itself (describes it).
+
+## Subsequence
+A subsequence of a `sequence`. It's formed by specifying the amount of `space` and trying to fill that amount by taking consequent items of `space` from the `sequence`. \*
+
+\* There could be different mechanisms for evaluating whether each such item can be used to fill the `space` in the `subsequence` (I might add their description later in these notes-docs \*2 (also, *$fillSpace-and-fillSchema* talks about that)). \*1
+
+\*1 From these mechanisms also follows the way `reached` is determined \*3 (also, the eventual value of `delta` follows from that).
+
+`location` is the index of the `subsequence`'s first item, as it appears in the `sequence` (e.g., for `sequence: [0,1,2,3]` and `subsequence: [1,2]`, the `location` of the subsequence is *1*)
+
+`space to fill` may be represented
+
+\*2 `fillSchema` is a more specific case of `fillSpace` (?), wherein `schema` represents not only the total amount of space that needs to be filled, but (certain characteristics of) a structure that the filling items should comprise. Particularly (more specifically), it specifies what items in the subsequence-to-be should take up how much space. The order in which the items occur doesn't matter, but for each item, specified in the schema there should be a match (in terms of the amount of space it takes) in the subsequence
+
+\*3 `reached` answers the question of whether any of the limiting conditions (as described in *$fillSpace-and-fillSchema*) has been reached. But this information, stored in the `subsequence` doesn't seem to be used in the code. Furthermore, if needed, it can be attained by simply running the `fill-` methods on the respective part of the sequence.
+I.e., for `sequence: [2,2,1]`, `space to fill: 3`, `subsequence: [2]` with `location: 0`, the equivalent of `reached` can be found out by running `fillSpace` with `d` of `1` and checking `delta` (difference between total space of items in the resulting subsequence and space to fill). Besides, if the `d` > `space to fill`, then `reached` must be true (?) (see the note in *$fillSpace-and-fillSchema*)
 
 ## Subsequences (groups)
 Each subsequent `subsequence` in `subsequences` is `located` further in the `sequence` by at least *one* `item`.
@@ -13,11 +37,12 @@ Each subsequent `subsequence` in `subsequences` is `located` further in the `seq
 
 ## fillSpace and fillSchema
 The core logic in both fillSpace (formGroupBySpace) and fillSchema (formGroupBySchema) is the same, thus it might be better to put it in a single place. `fillSpace` does that.
-The equivalent would be to use `fillSpace` for space and `fillSchema` for for schema.
+The equivalent would be to use `fillSpace` for space and `fillSchema` for schema.
 These are equivalence pairs between conditions in `fillSpace` and `fillSchema` (in the sense that they return semantically equivalent values (?)):
-`spaceLeftNew < 0`, `!schema.includes(item.space)`
+`spaceLeftNew < 0`, `!schema.includes(itemSpace)`
 `0 === spaceLeftNew`, `schema.length === 0`
 The order in which these are checked is the same in both `fillSchema` and `fillSpace`
+*note:* In the return value of `fillSpace`, this is impossible: `d > 0 && false === reached`
 
 # Spec
 

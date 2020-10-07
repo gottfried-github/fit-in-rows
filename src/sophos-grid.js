@@ -1,5 +1,7 @@
 const {randomBinaryProportionateSeqSecond} = require('./test-helpers')
-const {permutationsToCombinations, getSize, isRatioEqual, overlaps, isAdjacent, sortItemsByType} = require('./helpers')
+const {permutationsToCombinations, getSize, isRatioEqual, sortItemsByType, clone,
+  overlaps, isAdjacent,
+} = require('./helpers')
 
 /**
 function main(groupSchemas) {
@@ -17,63 +19,106 @@ function formAllSequences(itemTypes, groupSize) {
 }
 */
 
-function formGroupsAll(space, sequence) {
+/**
+  It's assumed here, that each subsequent group in groups
+  is situated further in the sequence of items by at least
+  one item (see Notes.Subsequences)
+
+  This has been only tried on homogeneous subsequences
+*/
+function negateOverlaps(subSs) {
+  return doNegateOverlaps(subSs, [], doNegateOverlaps)
+}
+
+function doNegateOverlaps(subSs, sequences, negate) {
+  if (0 === subSs.length) return sequences
+
+  return negate(subSs,
+    cascadeSubsequence(subSs.shift(), sequences, cascadeSubsequence), negate
+  )
+}
+
+function cascadeSubsequence(subS, sequences, cascade) {
+  if (0 === sequences.length) return [[subS]]
+
+  if (!overlaps(sequences[0][sequences[0].length-1], subS)) {
+    sequences[0].push(subS)
+    return sequences
+  }
+
+  const s = sequences.shift()
+  return [s, ...cascade(subS, sequences, cascade)]
+}
+
+/**
+  @param {[Int || [Int]]} space array of @space params to pass to formHomogeneousSubsequences
+  @param {Sequence} sequence (see $Sequence in notes.md)
+*/
+function formSubsequences(space, sequence) {
   return space.reduce((bySpace, space) => {
-    bySpace.push(formGroupsAllHomo(space, sequence.map(i => i)))
+    bySpace.push(formHomogeneousSubsequences(space, clone(sequence)))
     return bySpace
   }, [])
 }
 
 /**
   @param {Int || [Int]} space space to fill (either a number or a schema)
+  @param {Sequence} sequence (see $Sequence in notes.md)
 */
-function formGroupsAllHomo(space, sequence) {
-  const isSchema = Array.isArray(space),
-  fill = (isSchema) ? fillSchema : fillSpace,
-  l = sequence.length
+function formHomogeneousSubsequences(space, sequence) {
+  const subSs = []
 
-  const gs = [], gsMap = []
-
+  const len = sequence.length
   while (sequence.length>0) {
-    const g = fill(space.map(i => i), sequence.map(i => i), [], fill)
+    const subS = formSubsequence(space, sequence)
+    subS.location = len - sequence.length
 
-    const d = isSchema ? g.d.length : g.d
-    g.i = l - sequence.length
-
-    if (0 === d) gs.push(g)
-
+    if (subS.isDeltaEmpty()) subSs.push(subS)
     sequence.shift()
   }
 
-  return gs
+  return subSs
 }
 
+function formSubsequence(space, sequence) {
+  return new Subsequence(
+    space, Array.isArray(space)
+      ? fillSchema([...space], [...sequence], [], fillSchema)
+      : fillSpace(space, [...sequence], [], fillSpace),
+  )
+}
+
+/**
+  @param {Sequence} sSrc (see $Sequence in notes.md)
+*/
 function fillSpace(d, sSrc, s, fill) {
-  if (sSrc.length === 0) return {s, d, reachedLimit: true}
+  if (sSrc.length === 0) return s
 
-  const item = sSrc.shift()
-  const dNew = d - item.space
+  const itemSpace = sSrc.shift()
+  const dNew = d - itemSpace
 
-  if (dNew < 0) return {s, d, reachedLimit: true}
+  if (dNew < 0) return s
 
-  s.push(item)
+  s.push(itemSpace)
 
-  if (0 === dNew) return {s, d: dNew, reachedLimit: false}
+  if (0 === dNew) return s
+
   return fill(dNew, sSrc, s, fill)
 }
 
+/**
+  @param {Sequence} sSrc (see $Sequence in notes.md)
+*/
 function fillSchema(d, sSrc, s, fill) {
-  if (sSrc.length === 0) return {s, d, reachedLimit: true}
+  if (sSrc.length === 0) return s
 
-  const item = sSrc.shift()
-  if (!d.includes(item.space)) return {
-    s, d, reachedLimit: true
-  }
+  const itemSpace = sSrc.shift()
+  if (!d.includes(itemSpace)) return s
 
-  d.splice(d.indexOf(item.space), 1)
-  s.push(item)
+  d.splice(d.indexOf(itemSpace), 1)
+  s.push(itemSpace)
 
-  if (d.length === 0) return {s, d, reachedLimit: false}
+  if (d.length === 0) return s
   return fill(d, sSrc, s, fill)
 }
 
@@ -96,41 +141,84 @@ function formSideByOrderedSchema(schema, sSrc, s, formSide) {
 */
 
 /**
-  It's assumed here, that each subsequent group in groups
-  is situated further in the sequence of items by at least
-  one item (see Notes.Subsequences)
+  @param {$Space || $Schema} spaceToFill
 */
-function negateOverlaps(groups) {
-  return doNegateOverlaps(groups, [], doNegateOverlaps)
-}
-
-function doNegateOverlaps(groups, sequences, negate) {
-  if (0 === groups.length) return sequences
-
-  return negate(groups,
-    cascadeGroup(groups.shift(), sequences, cascadeGroup), negate
-  )
-}
-
-function cascadeGroup(g, sequences, cascade) {
-  if (0 === sequences.length) return [[g]]
-
-  if (!overlaps(sequences[0][sequences[0].length-1], g)) {
-    sequences[0].push(g)
-    return sequences
+class Subsequence {
+  constructor(spaceToFill, items, location) {
+    this._spaceToFill = spaceToFill
+    this.items = items
   }
 
-  const s = sequences.shift()
-  return [s, ...cascade(g, sequences, cascade)]
+  get delta() {
+    return (Array.isArray(this._spaceToFill))
+      ? this._spaceToFill.reduce((d, i) => {
+        if (this.items.includes(i)) return d
+        d.push(i); return d
+      }, [])
+      : this._spaceToFill - this.size
+  }
+
+  set delta(x) {
+    throw new Error("delta is read-only")
+  }
+
+  get size() {
+    return this.items.reduce((sum, i) => sum+i, 0)
+  }
+
+  set size(x) {
+    throw new Error("size is read-only")
+  }
+
+  isDeltaEmpty() {
+    return Array.isArray(this.delta)
+      ? 0 === this.delta.length
+      : 0 === this.delta
+  }
 }
 
+/**
+  @param {[Int]} items Int represents the space the item takes, in units of space
+  @param {[Int || [Int]]} delta space left after trying to fill the subsequence with items
+    || a piece of schema, left after trying to fill the subsequence with items
+  @param {Boolean} reached whether a condition has been met, which makes it impossible to
+    fill the `subsequence` with subsequent items from the source `sequence`
+  @param {Int} location
+
+  class Subsequence {
+    constructor(items, delta, reached, location) {
+      if ('boolean' !== typeof(reached)) throw new Error("reached must be a boolean")
+
+      this.items = items
+      this.delta = delta
+      this.reached = reached
+
+      this._location = "number" === typeof(location) || null
+    }
+
+    set location(l) {
+      if (null !== this._location) throw new Error("location already set and cant be changed")
+    }
+
+    get location() {
+      return this._location
+    }
+
+    isDeltaEmpty() {
+      return Array.isArray(this.delta)
+        ? 0 === this.delta.length
+        : 0 === this.delta
+    }
+  }
+*/
+
 module.exports = {
-  negateOverlaps, doNegateOverlaps, cascadeGroup,
-  formGroupsAll, formGroupsAllHomo,
+  negateOverlaps, doNegateOverlaps, cascadeSubsequence,
+  formSubsequences, formHomogeneousSubsequences,
 
-  fillSpace, fillSchema, formSideByOrderedSchema,
+  formSubsequence,
+  fillSpace, fillSchema,
 
-  formGroups,
-
+  Subsequence,
   t: require('./test-helpers'),
 }

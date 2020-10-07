@@ -88,7 +88,7 @@ function isRatioEqual(a, b) {
 }
 
 /**
-  @param {[Int]} items
+  @param {[Item]} items $Item
 */
 function sortItemsByType(items) {
   return items.reduce((topology, v, i) => {
@@ -102,26 +102,48 @@ function sortItemsByType(items) {
   }, new Map())
 }
 
+/**
+  @param {Sequence} sequence $Sequence
+*/
 function getSize(sequence) {
   return sequence.reduce((sum, i) => sum+i, 0)
 }
 
 /**
-  @param {Subsequence} a, b
+  @param {Subsequence} a, @param {Subsequence} b
 */
 function overlaps(a, b) {
-  const _a = a.s.map((item, i) => a.i+i),
-  _b = b.s.map((item, i) => b.i+i)
+  const bIs = b.items.map((item, i) => b.location+i)
 
-  let i = 0, l = a.s.length
+  let i = 0, l = a.items.length
   for (i; i<l; i++) {
-    if (_b.includes(_a[i])) return true
+    if (bIs.includes(a.location+i)) return true
   }
 
   return false
 }
 
 /*
+@param {Subsequence} a, b
+function overlaps(a, b) {
+  return doOverlaps(
+    a.items.map((item, i) => a.i+i)
+    b.items.map((item, i) => b.i+i)
+  )
+}
+
+  @param {[Int]} a, @param {[Int]} b
+    where Int is the position of the respective item in the source `sequence`
+function doOverlaps(a, b) {
+  let i = 0, l = a.length
+  for (i; i<l; i++) {
+    if (b.includes(a[i])) return true
+  }
+
+  return false
+}
+
+
 @param {[Int, Int, ...]} a, b
 function overlaps(a, b) {
   const overlap = []
@@ -160,11 +182,17 @@ function isAdjacent(a, b) {
     || a[0] - b[b.length-1] === 1
 }
 
+/*
 class Item {
   constructor(space) {
     if (!Number.isInteger(space) || space < 1) throw new Error("space must be an integer, greater than 0")
     this.space = space
   }
+}
+*/
+
+function clone(arr) {
+  return arr.map(i => i)
 }
 
 module.exports = {
@@ -172,4 +200,5 @@ module.exports = {
   getSize, isRatioEqual,
   overlaps, isAdjacent,
   sortItemsByType,
+  clone
 }
