@@ -1,201 +1,224 @@
-class GroupsByItem {
-  constructor() {
-    this.items = new Map()
-  }
+const {randomBinaryProportionateSeqSecond} = require('./test-helpers')
+const {permutationsToCombinations, getSize, isRatioEqual, sortItemsByType, clone,
+  overlaps, isAdjacent,
+} = require('./helpers')
 
-  push(i, ...groups) {
-    if (this.items.has(i)) {
-      this.items.get(i).push(...groups)
-    } else {
-      this.items.set(i, [...groups])
-    }
+/**
+function main(groupSchemas) {
 
-    // this.items.push(new ItemGroups(i, groups))
-  }
-
-  toArray() {
-    const itemsArr = []
-    console.log(this.items)
-    for (var [k,v] of this.items.entries()) {
-      // console.log(k,v)
-      itemsArr.push({i: k, gs: v})
-    }
-
-    return itemsArr
-  }
 }
 
-function formGroups(space, s, items) {
-  const groupsByItem = new GroupsByItem()
-  items.forEach(i => {
-    groupsByItem.push(i, formGroup(space, i, s))
-  })
+// itemTypes: [Int]
+// groupSize: {min: Int, max: Int}
+function formAllSequences(itemTypes, groupSize) {
+  const groupSizes = []
+  let size = groupSize.min
+  while (size < groupSize.max) {
+    groupSizes.push(size++)
+  }
+}
+*/
 
-  return groupsByItem.toArray()
+/**
+  It's assumed here, that each subsequent group in groups
+  is situated further in the sequence of items by at least
+  one item (see Notes.Subsequences)
+
+  This has been only tried on homogeneous subsequences
+*/
+function negateOverlaps(subSs) {
+  return doNegateOverlaps(subSs, [], doNegateOverlaps)
+}
+
+function doNegateOverlaps(subSs, sequences, negate) {
+  if (0 === subSs.length) return sequences
+
+  return negate(subSs,
+    cascadeSubsequence(subSs.shift(), sequences, cascadeSubsequence), negate
+  )
+}
+
+function cascadeSubsequence(subS, sequences, cascade) {
+  if (0 === sequences.length) return [[subS]]
+
+  if (!overlaps(sequences[0][sequences[0].length-1], subS)) {
+    sequences[0].push(subS)
+    return sequences
+  }
+
+  const s = sequences.shift()
+  return [s, ...cascade(subS, sequences, cascade)]
 }
 
 /**
-  @param {Int} originI index of the origin item in the sequence, from which
-  items are taken
-  class _Group {
-    constructor(originI, spaceToFill, sequence) {
-      this.originI = originI
-      this.spaceToFill = spaceToFill
-      this.sequence = sequence
-
-      const res = this.form(originI, spaceToFill, sequence)
-      if (res.after) this.after = res.after
-      if (res.before) this.before = res.before
-    }
-
-    form(i, space, s) {
-      space -= s[i].space
-      if (space <= 0) {
-        return null
-        // return new _Group(s[i], i, spaceToFill, null, null)
-        // return {
-        //   g: [i], spaceLeft: space,
-        //   reachedLeftLimit: true, reachedRightLimit: true,
-        // }
-      }
-
-      const after = doFormGroup(1, space, i, s, [])
-      console.log('formGroup, after', after)
-
-      if (after.spaceLeft === 0) {
-        return {after}
-        // return new _Group(s[i], i, spaceToFill, null, after)
-        // return {
-        //   g: [i].concat(after.g),
-        //   spaceLeft: after.spaceLeft,
-        //   reachedLeftLimit: false,
-        //   reachedRightLimit: !!after.reached
-        // }
-      }
-
-      const before = doFormGroup(-1, after.spaceLeft, i, s, [])
-      console.log('formGroup, before', before)
-
-      return {after, before}
-      // return new _Group(s[i], i, spaceToFill, before, after)
-    }
-
-    get reachedLeftLimit() {
-      return (this.before)
-        ? this.before.reached
-        : false
-    }
-
-    set reachedLeftLimit() {
-      throw new Error('reachedLeftLimit is read-only')
-    }
-
-    get reachedRightLimit() {
-      return (this.after)
-        ? this.after.reached : false
-    }
-
-    set reachedRightLimit() {
-      throw new Error('reachedRightLimit is read-only')
-    }
-
-    get spaceLeft() {
-      return this.spaceToFill - (
-        this.origin.space +
-        (this.before && 'number' === typeof(this.before.spaceLeft) || 0) +
-        (this.after && 'number' === typeof(this.after.spaceLeft) || 0)
-      )
-    }
-
-    set spaceLeft() {
-      throw new Error('spaceLeft is read-only')
-    }
-
-    get sequence() {
-      return [
-        ...(this.before || []), this.origin, ...(this.after || [])
-      ]
-    }
-
-    set sequence() {
-      throw new Error('sequence is read-only')
-    }
-
-    get originI() {
-      return (this.before || []).length
-    }
-
-    set originI() {
-      throw new Error('originI is read-only')
-    }
-  }
+  @param {[Int || [Int]]} space array of @space params to pass to formHomogeneousSubsequences
+  @param {Sequence} sequence (see $Sequence in notes.md)
 */
-
-function formGroup(originI, spaceToFill, sequence) {
-  const origin = sequence[originI]
-  // const before = sequence.slice(0, originI)
-  // const after = sequence.slice(originI+1)
-  if (0 === originI) {
-    const after = formSide([], sequence.slice(1), spaceToFill-origin.space)
-    return {
-      origin, after: after.s, before: null,
-      reachedLeftLimit: true, // $Groups.Reaching-Limit.3
-      reachedRightLimit: true, // $Groups.Reaching-Limit.1 (see * below)
-      spaceLeft: after.spaceLeft
-    }
-
-    // * some, possibly, irrelevant notes:
-    // if !after.reachedLimit, then spaceLeft must be 0
-    // (see $FormSide.note)
-  }
-
-
-  if (sequence.length-1 === originI) {
-    const before = formSide([],
-      sequence.slice(0, sequence.length-2).reverse(),
-      spaceToFill-origin.space
-    ); before.s.reverse()
-
-    return {
-      origin, after: null, before: before.s,
-      reachedLeftLimit: true, // $Groups.Reaching-Limit.1
-      reachedRightLimit: true, // $Groups.Reaching-Limit.3
-      spaceLeft: before.spaceLeft
-    }
-  }
-
-  const before = formSide([],
-    sequence.slice(0, originI).reverse(),
-    spaceToFill-origin.space
-  ); before.s.reverse()
-
-  const after = formSide([], sequence.slice(originI+1), spaceToFill-origin.space)
-
-  return {
-
-  }
-
+function formSubsequences(space, sequence) {
+  return space.reduce((bySpace, space) => {
+    bySpace.push(formHomogeneousSubsequences(space, clone(sequence)))
+    return bySpace
+  }, [])
 }
 
 /**
-
-  @returns
+  @param {Int || [Int]} space space to fill (either a number or a schema)
+  @param {Sequence} sequence (see $Sequence in notes.md)
 */
-function formSide(s, sSrc, spaceLeft) {
-  if (sSrc.length === 0) return {s, spaceLeft, reachedLimit: true}
+function formHomogeneousSubsequences(space, sequence) {
+  const subSs = []
+
+  const len = sequence.length
+  while (sequence.length>0) {
+    const subS = formSubsequence(space, sequence)
+    subS.location = len - sequence.length
+
+    if (subS.isDeltaEmpty()) subSs.push(subS)
+    sequence.shift()
+  }
+
+  return subSs
+}
+
+function formSubsequence(space, sequence) {
+  return new Subsequence(
+    space, Array.isArray(space)
+      ? fillSchema([...space], [...sequence], [], fillSchema)
+      : fillSpace(space, [...sequence], [], fillSpace),
+  )
+}
+
+/**
+  @param {Sequence} sSrc (see $Sequence in notes.md)
+*/
+function fillSpace(d, sSrc, s, fill) {
+  if (sSrc.length === 0) return s
+
+  const itemSpace = sSrc.shift()
+  const dNew = d - itemSpace
+
+  if (dNew < 0) return s
+
+  s.push(itemSpace)
+
+  if (0 === dNew) return s
+
+  return fill(dNew, sSrc, s, fill)
+}
+
+/**
+  @param {Sequence} sSrc (see $Sequence in notes.md)
+*/
+function fillSchema(d, sSrc, s, fill) {
+  if (sSrc.length === 0) return s
+
+  const itemSpace = sSrc.shift()
+  if (!d.includes(itemSpace)) return s
+
+  d.splice(d.indexOf(itemSpace), 1)
+  s.push(itemSpace)
+
+  if (d.length === 0) return s
+  return fill(d, sSrc, s, fill)
+}
+
+/*
+// this hasn't been run
+function formSideByOrderedSchema(schema, sSrc, s, formSide) {
+  if (sSrc.length === 0) return {s, schemaLeft: schema, reachedLimit: true}
 
   const item = sSrc.shift()
-  const spaceLeftNew = spaceLeft - item.space
+  if (!schema.includes(item.space)) return {
+    s, schemaLeft: schema, reachedLimit: true
+  }
 
-  if (spaceLeftNew >= 0) s.push(item)
+  schema.splice(schema.indexOf(item.space), 1)
+  s.push(item)
 
-  if (spaceLeftNew > 0) return formSide(s, sSrc, spaceLeftNew)
-  if (0 === spaceLeftNew) return {s, spaceLeft: spaceLeftNew, reachedLimit: false}
+  if (schema.length === 0) return {s, schemaLeft: schema, reachedLimit: false}
+  return formSide(schema, sSrc, s, formSide)
+}
+*/
 
-  return {s, spaceLeft, reachedLimit: true}
+/**
+  @param {$Space || $Schema} spaceToFill
+*/
+class Subsequence {
+  constructor(spaceToFill, items, location) {
+    this._spaceToFill = spaceToFill
+    this.items = items
+  }
+
+  get delta() {
+    return (Array.isArray(this._spaceToFill))
+      ? this._spaceToFill.reduce((d, i) => {
+        if (this.items.includes(i)) return d
+        d.push(i); return d
+      }, [])
+      : this._spaceToFill - this.size
+  }
+
+  set delta(x) {
+    throw new Error("delta is read-only")
+  }
+
+  get size() {
+    return this.items.reduce((sum, i) => sum+i, 0)
+  }
+
+  set size(x) {
+    throw new Error("size is read-only")
+  }
+
+  isDeltaEmpty() {
+    return Array.isArray(this.delta)
+      ? 0 === this.delta.length
+      : 0 === this.delta
+  }
 }
 
+/**
+  @param {[Int]} items Int represents the space the item takes, in units of space
+  @param {[Int || [Int]]} delta space left after trying to fill the subsequence with items
+    || a piece of schema, left after trying to fill the subsequence with items
+  @param {Boolean} reached whether a condition has been met, which makes it impossible to
+    fill the `subsequence` with subsequent items from the source `sequence`
+  @param {Int} location
+
+  class Subsequence {
+    constructor(items, delta, reached, location) {
+      if ('boolean' !== typeof(reached)) throw new Error("reached must be a boolean")
+
+      this.items = items
+      this.delta = delta
+      this.reached = reached
+
+      this._location = "number" === typeof(location) || null
+    }
+
+    set location(l) {
+      if (null !== this._location) throw new Error("location already set and cant be changed")
+    }
+
+    get location() {
+      return this._location
+    }
+
+    isDeltaEmpty() {
+      return Array.isArray(this.delta)
+        ? 0 === this.delta.length
+        : 0 === this.delta
+    }
+  }
+*/
+
 module.exports = {
-  formGroup, formSide,
-  GroupsByItem,
+  negateOverlaps, doNegateOverlaps, cascadeSubsequence,
+  formSubsequences, formHomogeneousSubsequences,
+
+  formSubsequence,
+  fillSpace, fillSchema,
+
+  Subsequence,
+  t: require('./test-helpers'),
 }
