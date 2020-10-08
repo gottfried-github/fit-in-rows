@@ -1,7 +1,7 @@
 const {doRecursivelyIterate, makeRecursivelyIterate} = require('recursion-and-discrete-math')
-const {sortItemsBySpace} = require('./helpers')
+const {Item} = require('./helpers')
 
-function randomBinaryProportionateSeq(n, w) {
+function randomBinaryProportionateSeq(n, w, nSpace, wSpace) {
   const sN = []; sN.length = n; sN.fill(0)
   const sW = []; sW.length = w; sW.fill(1)
   const _s = sN.concat(sW);
@@ -11,14 +11,7 @@ function randomBinaryProportionateSeq(n, w) {
     s.push(_s.splice(randomBetween(0, _s.length-1), 1)[0])
   }
 
-  return s
-}
-
-class Item {
-  constructor(space) {
-    if (!Number.isInteger(space) || space < 1) throw new Error("space must be an integer, greater than 0")
-    this.space = space
-  }
+  return s.map((i) => (i === 0) ? nSpace : wSpace)
 }
 
 function randomBinaryProportionateSeqSecond(n, w, nSpace, wSpace) {
@@ -31,6 +24,18 @@ function randomBinaryProportionateSeqSecond(n, w, nSpace, wSpace) {
 function randomPropSortedSeqSecond(n,w, nSpace,wSpace) {
   const s = randomBinaryProportionateSeqSecond(n,w, nSpace,wSpace)
   return {s, sS: sortItemsBySpace(s).get(wSpace)}
+}
+
+function sortItemsBySpace(sequence) {
+  return sequence.reduce((topology, v, i) => {
+    if (topology.has(v.space)) {
+      topology.get(v.space).push(i)
+    } else {
+      topology.set(v.space, [i])
+    }
+
+    return topology
+  }, new Map())
 }
 
 function randomBinarySequence(l) {
