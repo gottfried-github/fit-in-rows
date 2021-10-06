@@ -1,7 +1,6 @@
 const {randomBinaryProportionateSeqSecond} = require('./test-helpers')
-const {permutationsToCombinations, getSize, isRatioEqual, sortItemsByType, clone,
-  overlaps, isAdjacent,
-} = require('./helpers')
+const {permutationsToCombinations, getSize, isRatioEqual, sortItemsByType} = require('./schema-permutations')
+const {size, delta, isDeltaEmpty, overlaps} = require('./helpers')
 
 /**
 function main(groupSchemas) {
@@ -56,7 +55,7 @@ function cascadeSubsequence(subS, sequences, cascade) {
 */
 function formSubsequences(space, sequence) {
   return space.reduce((bySpace, space) => {
-    bySpace.push(formHomogeneousSubsequences(space, clone(sequence)))
+    bySpace.push(formHomogeneousSubsequences(space, [...sequence]))
     return bySpace
   }, [])
 }
@@ -68,18 +67,28 @@ function formSubsequences(space, sequence) {
 function formHomogeneousSubsequences(space, sequence) {
   const subSs = []
 
-  const len = sequence.length
+  const originalLength = sequence.length
   while (sequence.length>0) {
-    const subS = formSubsequence(space, sequence)
-    subS.location = len - sequence.length
+    const subS = fill(space, sequence)
 
-    if (subS.isDeltaEmpty()) subSs.push(subS)
+    // store refs to `items` in the `sequence` rather than the `items` themselves
+    if (isDeltaEmpty(space, subS)) subSs.push(subS.map(
+      (t,i) => (originalLength - sequence.length) + i
+    ))
+
     sequence.shift()
   }
 
   return subSs
 }
 
+function fill(space, sequence) {
+  return Array.isArray(space)
+    ? fillSchema([...space], [...sequence], [], fillSchema)
+    : fillSpace(space, [...sequence], [], fillSpace)
+}
+
+/*
 function formSubsequence(space, sequence) {
   return new Subsequence(
     space, Array.isArray(space)
@@ -87,6 +96,7 @@ function formSubsequence(space, sequence) {
       : fillSpace(space, [...sequence], [], fillSpace),
   )
 }
+*/
 
 /**
   @param {Sequence} sSrc (see $Sequence in notes.md)
@@ -141,67 +151,32 @@ function formSideByOrderedSchema(schema, sSrc, s, formSide) {
 */
 
 /**
-  @param {$Space || $Schema} spaceToFill
-*/
-class Subsequence {
-  constructor(spaceToFill, items, location) {
-    this._spaceToFill = spaceToFill
-    this.items = items
-  }
-
-  get delta() {
-    return (Array.isArray(this._spaceToFill))
-      ? this._spaceToFill.reduce((d, i) => {
-        if (this.items.includes(i)) return d
-        d.push(i); return d
-      }, [])
-      : this._spaceToFill - this.size
-  }
-
-  set delta(x) {
-    throw new Error("delta is read-only")
-  }
-
-  get size() {
-    return this.items.reduce((sum, i) => sum+i, 0)
-  }
-
-  set size(x) {
-    throw new Error("size is read-only")
-  }
-
-  isDeltaEmpty() {
-    return Array.isArray(this.delta)
-      ? 0 === this.delta.length
-      : 0 === this.delta
-  }
-}
-
-/**
-  @param {[Int]} items Int represents the space the item takes, in units of space
-  @param {[Int || [Int]]} delta space left after trying to fill the subsequence with items
-    || a piece of schema, left after trying to fill the subsequence with items
-  @param {Boolean} reached whether a condition has been met, which makes it impossible to
-    fill the `subsequence` with subsequent items from the source `sequence`
-  @param {Int} location
-
+  @param {Space || Schema} spaceToFill
   class Subsequence {
-    constructor(items, delta, reached, location) {
-      if ('boolean' !== typeof(reached)) throw new Error("reached must be a boolean")
-
+    constructor(spaceToFill, items, location) {
+      this._spaceToFill = spaceToFill
       this.items = items
-      this.delta = delta
-      this.reached = reached
-
-      this._location = "number" === typeof(location) || null
     }
 
-    set location(l) {
-      if (null !== this._location) throw new Error("location already set and cant be changed")
+    get delta() {
+      return (Array.isArray(this._spaceToFill))
+        ? this._spaceToFill.reduce((d, i) => {
+          if (this.items.includes(i)) return d
+          d.push(i); return d
+        }, [])
+        : this._spaceToFill - this.size
     }
 
-    get location() {
-      return this._location
+    set delta(x) {
+      throw new Error("delta is read-only")
+    }
+
+    get size() {
+      return this.items.reduce((sum, i) => sum+i, 0)
+    }
+
+    set size(x) {
+      throw new Error("size is read-only")
     }
 
     isDeltaEmpty() {
@@ -216,9 +191,8 @@ module.exports = {
   negateOverlaps, doNegateOverlaps, cascadeSubsequence,
   formSubsequences, formHomogeneousSubsequences,
 
-  formSubsequence,
-  fillSpace, fillSchema,
+  fillSpace, fillSchema, fill,
 
-  Subsequence,
+  // Subsequence,
   t: require('./test-helpers'),
 }

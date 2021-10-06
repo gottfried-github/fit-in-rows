@@ -1,117 +1,55 @@
-const {doRecursivelyIterate, makeRecursivelyIterate} = require('recursion-and-discrete-math')
-
-function allSchemas(size, itemTypes, ordered) {
-  const ps = createSchemaPermutations(size, itemTypes)
-  if (ordered) return ps
-  return permutationsToCombinations(ps, itemTypes)
-}
-
-function createSchemaPermutations(size, itemTypes) {
-  if (itemTypes.filter(t => (t>size) ? true : false).length > 0) throw new Error()
-
-  const schemas = []
-  // if (itemTypes.includes(size)) schemas.push([size])
-
-  let pSize = null, l = 0
-  while (pSize <= size) {
-    const ps = []
-
-    const i = makeRecursivelyIterate((v, data, depth, cb) => {
-      // console.log('v: ', v, 'data: ', data, 'depth: ', depth)
-      cb((v) ? [data].concat(v) : [data])
-    })
-    i(itemTypes, l, false, (v) => {ps.push(v)}, i)
-
-    // const ratios = []
-    //
-    // ps = ps.reduce((ps, p) => {
-    //   sortItemsBySpace()
-    //
-    //   return ps
-    // }, [])
-
-    pSize = Math.min(...ps.map(p => getSize(p)))
-
-    ps.forEach(p => {
-      if (size === getSize(p)) schemas.push(p)
-    })
-
-    l++
+/**
+  @param {[Int]} [a,b] Int being the index of an `item` in the `sequence`
+*/
+function overlaps(a, b) {
+  let i = 0, l = a.length
+  for (i; i<l; i++) {
+    if (b.includes(a[i])) return true
   }
 
-  return schemas
+  return false
 }
 
-function permutationsToCombinations(ps, itemTypes) {
-  const combinations = []
+/**
+  @param {`space` || `schema`} space a sequence of `items`
+  @param {[Item]} sequence a sequence of `items`
+*/
+function delta(space, sequence) {
+  if ('number' === typeof(space)) return space - size(sequence)
+  if (!Array.isArray(space)) throw new Error()
 
-  const ratios = ps.reduce((ratios, p, i) => {
-    // console.log('p', ps[i])
-    const pR = sortItemsByType(p)
-    if (0 === ratios.length) {
-      combinations.push(p); return [pR]
-    }
-
-    let _i = 0, l = ratios.length
-    while (_i < l) {
-      // console.log(ps[_i])
-      if (isRatioEqual(ratios[_i], pR)) return ratios
-      _i++
-    }
-
-    combinations.push(ps[i])
-    ratios.push(pR)
-    return ratios
+  return space.reduce((d, i) => {
+    if (sequence.includes(i)) return d
+    d.push(i); return d
   }, [])
-
-  return combinations
-}
-
-function isRatioEqual(a, b) {
-  const bKs = b.keys()
-  // console.log(bKs)
-
-  if (a.size !== b.size) return false
-
-  let {done, value} = bKs.next()
-
-  while (!done) {
-    if (
-    !a.has(value) || a.get(value).length !== b.get(value).length
-    ) break
-
-    const res = bKs.next()
-    done = res.done; value = res.value
-  }
-
-  return done
 }
 
 /**
-  @param {[Item]} items $Item
+  @param {[Item]} sequence a sequence of `items`
 */
-function sortItemsByType(items) {
-  return items.reduce((topology, v, i) => {
-    if (topology.has(v)) {
-      topology.get(v).push(i)
-    } else {
-      topology.set(v, [i])
-    }
-
-    return topology
-  }, new Map())
-}
-
-/**
-  @param {Sequence} sequence $Sequence
-*/
-function getSize(sequence) {
+function size(sequence) {
   return sequence.reduce((sum, i) => sum+i, 0)
 }
 
 /**
-  @param {Subsequence} a, @param {Subsequence} b
+  @param {`space` || `schema`} space a sequence of `items`
+  @param {[Item]} sequence a sequence of `items`
 */
+function isDeltaEmpty(space, sequence) {
+  const _delta = delta(space, sequence)
+  return Array.isArray(_delta)
+    ? 0 === _delta.length
+    : 0 === _delta
+}
+
+/*
+// this hasn't been run
+function isAdjacent(a, b) {
+  return b[0] - a[a.length-1] === 1
+    || a[0] - b[b.length-1] === 1
+}
+
+@param {Subsequence} [a, b]
 function overlaps(a, b) {
   const bIs = b.items.map((item, i) => b.location+i)
 
@@ -123,8 +61,6 @@ function overlaps(a, b) {
   return false
 }
 
-/*
-@param {Subsequence} a, b
 function overlaps(a, b) {
   return doOverlaps(
     a.items.map((item, i) => a.i+i)
@@ -142,63 +78,8 @@ function doOverlaps(a, b) {
 
   return false
 }
-
-
-@param {[Int, Int, ...]} a, b
-function overlaps(a, b) {
-  const overlap = []
-  a.forEach((i) => {
-    if (b.includes(i)) overlap.push(i)
-  })
-
-  let res = null
-
-  if (overlap.length>0) {
-    const aI = a.indexOf(overlap[0]),
-    bI = b.indexOf(overlap[0])
-
-    if (aI > bI) {
-      return {
-        res: [a, overlap, b],
-        // res: [a.slice(0, aI), overlap, b.slice(bI+overlap.length)],
-      }
-    } else if (bI > aI) {
-      return {
-        res: [b, overlap, a],
-        // res: [b.slice(0, bI), overlap, a.slice(aI+overlap.length)],
-      }
-    }
-
-    return true
-  }
-
-  return false
-}
 */
-
-// this hasn't been run
-function isAdjacent(a, b) {
-  return b[0] - a[a.length-1] === 1
-    || a[0] - b[b.length-1] === 1
-}
-
-/*
-class Item {
-  constructor(space) {
-    if (!Number.isInteger(space) || space < 1) throw new Error("space must be an integer, greater than 0")
-    this.space = space
-  }
-}
-*/
-
-function clone(arr) {
-  return arr.map(i => i)
-}
 
 module.exports = {
-  createSchemaPermutations, permutationsToCombinations, allSchemas,
-  getSize, isRatioEqual,
-  overlaps, isAdjacent,
-  sortItemsByType,
-  clone
+  delta, size, overlaps, isDeltaEmpty,
 }
