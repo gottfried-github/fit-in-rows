@@ -1,6 +1,6 @@
 ## What it does
 Generate all possible subsequences for a sequence, where each subsequence meets a given criterion (given either in terms of `space` or of `schema`).
-For example, for a sequence `1,2, 1,1,1, 1,2` and criterion `3` (given in terms of `space`), generate the following subsequences: `1,2`, `2,1`, `1,1,1`, `1,2`, `2,1`.
+For example, for a sequence `1,2, 1,1,1, 1,2` and criterion `3` (given in terms of `space`), generate the following subsequences: `1,2`, `2,1`, `1,1,1`, `1,2`, `2,1`. I.e., generate all subsequences where the total amount of `space` is equal to `3`.
 
 ## Space
 Defined by number of units (e.g., *2* is *two* units of space).
