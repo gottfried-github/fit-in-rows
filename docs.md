@@ -1,3 +1,7 @@
+## What it does
+Generate all possible subsequences for a sequence, where each subsequence meets a given criterion (given either in terms of `space` or of `schema`).
+For example, for a sequence `1,2, 1,1,1, 1,2` and criterion `3` (given in terms of `space`), generate the following subsequences: `1,2`, `2,1`, `1,1,1`, `1,2`, `2,1`.
+
 ## Space
 Defined by number of units (e.g., *2* is *two* units of space).
 
@@ -6,7 +10,8 @@ A declaration <!--(specification, expression)--> of certain amount of `space`. E
 
 ## Schema
 A *set* of `items`. For a `subsequence`, it specifies what `items` and in what quantities a `subsequence` should contain.
-
+For example, for schema `1,2` and a sequence `1,2, 1,1,1, 2,1`, the following subsequences will be generated:
+`1,2`, `2,1`, `1,2`, `2,1`.
 <!-- I.e., the order in which `items` occur in the `schema` is irrelevant (at least, in the context of using it for forming a `subsequence`). -->
 <!-- For some `items`, which of them take how much `space`. -->
 
