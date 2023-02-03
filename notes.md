@@ -1,5 +1,33 @@
 # Notes
 
+## Description
+### Main function
+Break a sequence of items into rows such that the last row is filled.
+
+### The method
+First, generate `subsequence`s starting from each `item` in the `sequence` (in `formHomogenousSubsequences`). Then, out of the generated `subsequence`s, form sequences where none of the `subsequence`s overlap (`cascadeSubsequence`).
+
+## Technical overview
+### formHomogeneousSubsequences
+Form `subsequence`s with given `space` starting from each `item` in the given `sequence`. I.e., take each `item` in the given `sequence` as a starting `item` for a `subsequence` with given `space`. 
+
+The resulting `subsequence`s are ordered subsequently: each next `subsequence`'s first `item` is either subsequent or identical but not precedent to the previous `item` in the given `sequence`.
+
+### cascadeSubsequence
+Appends the given `subsequence` to the first sequence of given sequences of `subsequence`s where the `subsequence` doesn't overlap the last `subsequence` in that sequence or to a new empty sequence if all of the previous sequences overlap.
+
+To produce expected results, it is expected that:
+1. the first `item` of the first `subsequence` of each sequence in the given sequences is either subsequent or identical but not precedent in a `sequence` to that in the previous sequence.
+2. each sequence's `subsequence`s are ordered subsequently and without overlap.
+
+### negateOverlaps
+Runs `cascadeSubsequence` for each `subsequence` in the given `subsequence`s, accumulating the sequences, produced by it.
+
+To produce expected results, it is expected that the given `subsequence`s are ordered subsequently: that each next `subsequence`'s first `item` is either subsequent or identical but not precedent to the previous `item` in a `sequence`.
+
+### fillSpace
+
+
 # /
 Right now, methods that need to have the information about the location of `items` of a `subsequence` in the `sequence` (like `overlaps`) rely on the `location` property of a `Subsequence`. This property, right now is not intrinsic to `Subsequence` but is set by the method, which processes the entire `sequence` to produce `subsequences` (right now it is the `formHomogeneousSubsequences`).
 It may be better to have a `subsequence` be represented by the indices of the comprising `item`s, where each index would point to the respective `item`'s location in the `sequence`.
