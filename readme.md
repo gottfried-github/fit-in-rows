@@ -43,4 +43,4 @@ Runs `cascadeSubsequence` for each `subsequence` in the given `subsequence`s, ac
 To produce expected results, it is expected that the given `subsequence`s are ordered subsequently: that each next `subsequence`'s first `item` is either subsequent or identical but not precedent to the previous `item` in a `sequence`.
 
 #### fillSpace
-Form a `subsequence` by unshifting `item`s from the given `sequence` until the given `space` is filled in the `subsequence`.
+Form a `subsequence` by unshifting `item`s from the given `sequence` until the given `space` is filled in the `subsequence` or leave the `space` unfilled if no matching `item`s are present in the `sequence`.

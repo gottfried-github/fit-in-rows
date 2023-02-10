@@ -105,6 +105,7 @@ function formSubsequence(space, sequence) {
 
 /**
   @param {Sequence} sSrc (see Sequence)
+  @description Form a `subsequence` by unshifting `item`s from the given `sequence` until the given `space` is filled in the `subsequence`
 */
 function fillSpace(d, sSrc, s, fill) {
   if (sSrc.length === 0) return s
