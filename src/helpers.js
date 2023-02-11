@@ -1,5 +1,7 @@
 /**
-  @param {[Int]} [a,b] Int being the index of an `item` in the `sequence`
+  @param {Array} a a `subsequence`, represented by `ref`s
+  @param {Array} b a `subsequence`, represented by `ref`s
+  @returns whether a and b overlap each other
 */
 function overlaps(a, b) {
   let i = 0, l = a.length
@@ -11,8 +13,8 @@ function overlaps(a, b) {
 }
 
 /**
-  @param {`space` || `schema`} space a sequence of `items`
-  @param {[Item]} sequence a sequence of `items`
+  @param {Number || Array} space either `space` or `schema`
+  @param {Array} sequence a sequence of `item`s (e.g., a `subsequence`)
 */
 function delta(space, sequence) {
   if ('number' === typeof(space)) return space - size(sequence)
@@ -25,15 +27,15 @@ function delta(space, sequence) {
 }
 
 /**
-  @param {[Item]} sequence a sequence of `items`
+  @param {[Item]} sequence a sequence of `items` (e.g., a `subsequence`)
 */
 function size(sequence) {
   return sequence.reduce((sum, i) => sum+i, 0)
 }
 
 /**
-  @param {`space` || `schema`} space a sequence of `items`
-  @param {[Item]} sequence a sequence of `items`
+  @param {Number || Array} space either `space` or `schema`
+  @param {[Item]} sequence a sequence of `items` (e.g., a `subsequence`)
 */
 function isDeltaEmpty(space, sequence) {
   const _delta = delta(space, sequence)
@@ -80,6 +82,6 @@ function doOverlaps(a, b) {
 }
 */
 
-module.exports = {
+export {
   delta, size, overlaps, isDeltaEmpty,
 }
