@@ -1,9 +1,13 @@
 ## Description
-### The function
-Break a sequence of items into rows such that the last row is filled.
+Break a sequence of items into rows of specified structure such that the rows are consecutive. Work in progress: the condition that the rows are consecutive is not achieved yet.
 
-### The method
-First, generate `subsequence`s starting from each `item` in the `sequence` (in `formHomogenousSubsequences`). Then, out of the generated `subsequence`s, form sequences where none of the `subsequence`s overlap (`cascadeSubsequence`).
+### Specifying rows
+Items are either wide or narrow. A wide item takes `2` of [`space`](#space); a narrow one takes `1`.
+
+The structure of a row is specified by total amount of [`space`](#space) items in it constitute. For example, the [`space`](#space) of `3` says that a row can only contain either three narrow items or one narrow and one wide item - but no more or less than that.
+
+### Breaking the sequence
+First, I generate `subsequence`s of given [`space`](#space) (representing rows) starting from each `item` in the `sequence` (in `formHomogenousSubsequences`). Then, out of the generated `subsequence`s, I form sequences where none of the `subsequence`s overlap (`cascadeSubsequence`).
 
 ## Technical overview
 ### Semantics
@@ -11,7 +15,7 @@ First, generate `subsequence`s starting from each `item` in the `sequence` (in `
 Defined by number of units (e.g., *2* is *two* units of space)
 
 #### Item
-A specification of certain amount of `space`. E.g., `2`
+A specification of certain amount of `space`. E.g., `2`. Currently, only `item`s of `1` and `2` `space` are possible: `1` for a narrow item and `2` for a wide one.
 
 #### Sequence
 A sequence of `items`
