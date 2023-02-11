@@ -19,6 +19,9 @@ A sequence of `items`
 #### Subsequence
 A subsequence of a `sequence`
 
+#### Ref
+A reference to an `item` in a `sequence` by the `item`'s index
+
 #### Schema
 A *set* of `items`. For a `subsequence`, it specifies what `items` and in what quantities a `subsequence` should contain.
 For example, for schema `1,2` and a sequence `1,2, 1,1,1, 2,1`, the following subsequences will be generated:

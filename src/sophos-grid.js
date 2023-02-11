@@ -37,7 +37,7 @@ function doNegateOverlaps(subSs, sequences, negate) {
 /**
  * @param {Array} subS a `subsequence`
  * @param {[Array, Array, ...] || []} sequences of `subsequence`s
- * @returns sequences of `subsequence`s where none of the `subsequence`s overlap
+ * @returns sequences of `subsequence`s, represented by `ref`s, where none of the `subsequence`s overlap
  * @description appends the subS to the first sequence in the sequences where it doesn't overlap with the last `subsequence` or appends a new sequence, containing the subS, to the sequences if all sequences overlap
 */
 function cascadeSubsequence(subS, sequences, cascade) {
@@ -54,8 +54,8 @@ function cascadeSubsequence(subS, sequences, cascade) {
 }
 
 /**
-  @param {[Int || [Int]]} space array of @space params to pass to formHomogeneousSubsequences
-  @param {Sequence} sequence (see $Sequence in notes.md)
+  @param {[Number || Array]} space array of `space` or `schema` params to pass to formHomogeneousSubsequences
+  @param {Array} sequence a `sequence`
 */
 function formSubsequences(space, sequence) {
   return space.reduce((bySpace, space) => {
@@ -65,9 +65,9 @@ function formSubsequences(space, sequence) {
 }
 
 /**
-  @param {Int || [Int]} space space to fill (either a number or a schema)
-  @param {Array} sequence (see Sequence)
-  @returns {Array} of `subsequence`s where each `subsequence`'s first `item` is subsequent to the previous `item` in the `sequence`
+  @param {Number || Array} space space to fill (either a `space` or a `schema`)
+  @param {Array} sequence a `sequence`
+  @returns {Array} of `subsequence`s, represented by `ref`s, where each `subsequence`'s first `item` is subsequent to the previous `item` in the `sequence`
 */
 function formHomogeneousSubsequences(space, sequence) {
   const subSs = []
@@ -104,7 +104,7 @@ function formSubsequence(space, sequence) {
 */
 
 /**
-  @param {Sequence} sSrc (see Sequence)
+  @param {Sequence} sSrc a `sequence`
   @description Form a `subsequence` by unshifting `item`s from the given `sequence` until the given `space` is filled in the `subsequence`
 */
 function fillSpace(d, sSrc, s, fill) {
@@ -123,7 +123,7 @@ function fillSpace(d, sSrc, s, fill) {
 }
 
 /**
-  @param {Sequence} sSrc (see Sequence)
+  @param {Sequence} sSrc a `sequence`
 */
 function fillSchema(d, sSrc, s, fill) {
   if (sSrc.length === 0) return s
