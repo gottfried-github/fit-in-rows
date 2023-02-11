@@ -1,6 +1,6 @@
-const {randomBinaryProportionateSeqSecond} = require('./test-helpers')
-const {permutationsToCombinations, getSize, isRatioEqual, sortItemsByType} = require('./schema-permutations')
-const {size, delta, isDeltaEmpty, overlaps} = require('./helpers')
+// const {randomBinaryProportionateSeqSecond} = require('./test-helpers')
+// const {permutationsToCombinations, getSize, isRatioEqual, sortItemsByType} = require('./schema-permutations')
+import {size, delta, isDeltaEmpty, overlaps} from './helpers.js'
 
 /**
 function main(groupSchemas) {
@@ -193,12 +193,9 @@ function formSideByOrderedSchema(schema, sSrc, s, formSide) {
   }
 */
 
-module.exports = {
+export {
   negateOverlaps, doNegateOverlaps, cascadeSubsequence,
   formSubsequences, formHomogeneousSubsequences,
 
   fillSpace, fillSchema, fill,
-
-  // Subsequence,
-  t: require('./test-helpers'),
 }

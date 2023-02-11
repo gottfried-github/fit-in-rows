@@ -80,6 +80,6 @@ function doOverlaps(a, b) {
 }
 */
 
-module.exports = {
+export {
   delta, size, overlaps, isDeltaEmpty,
 }

@@ -7,6 +7,7 @@
   "license": "MIT",
   "private": false,
   "description": "lay pictures out such that theres no unfufilled terminal rows",
+  "type": "module",
   "localDependencies": {
     "recursion-and-discrete-math": "^0.0.2"
   }
