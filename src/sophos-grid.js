@@ -56,6 +56,8 @@ function cascadeSubsequence(subS, sequences, cascade) {
 function subsequencesSequences(sequence, subsequences, subsequencesAll) {
   const sequences = []
 
+  const subsequenceLast = sequence[sequence.length-1]
+  
   subsequences[0].forEach((subsequence) => {
     const _sequence = [...sequence, subsequence]
     
@@ -67,25 +69,28 @@ function subsequencesSequences(sequence, subsequences, subsequencesAll) {
     let _subsequences = subsequences.slice(1)
 
     // skip overlapping subsequences
-    while (overlaps(subsequence, _subsequences[0][0])) {
-      const subsequenceLast = sequence[sequence.length-1]
-      const first = subsequenceLast ? subsequenceLast[subsequenceLast.length-1] : -1
-      
+    while (overlaps(subsequence, _subsequences[0][0])) {      
       if (_subsequences.length === 1) {
-        if (!containsSubsequences(first, subsequence[0], subsequencesAll.reduce((_subsequences, subsequences) => {_subsequences.push(...subsequences); return _subsequences}, []))) sequences.push(...subsequencesSequences(sequence, _subsequences, subsequencesAll))
-        if (!containsSubsequences(first, subsequence[0], subsequencesAll.reduce((_subsequences, subsequences) => {_subsequences.push(...subsequences); return _subsequences}, []))) sequences.push(_sequence)
+        if (containsSubsequences(subsequenceLast ? subsequenceLast[subsequenceLast.length-1] : -1, subsequence[0], subsequencesAll.reduce((_subsequences, subsequences) => {_subsequences.push(...subsequences); return _subsequences}, []))) return
+        
+        sequences.push(...subsequencesSequences(sequence, _subsequences, subsequencesAll))
+        sequences.push(_sequence)
+        
         return
       } 
 
-      if (!containsSubsequences(first, subsequence[0], subsequencesAll.reduce((_subsequences, subsequences) => {_subsequences.push(...subsequences); return _subsequences}, []))) sequences.push(...subsequencesSequences(sequence, _subsequences, subsequencesAll))
+      if (containsSubsequences(subsequenceLast ? subsequenceLast[subsequenceLast.length-1] : -1, subsequence[0], subsequencesAll.reduce((_subsequences, subsequences) => {_subsequences.push(...subsequences); return _subsequences}, []))) {
+        _subsequences = _subsequences.slice(1)
+        return
+      }
+      
+      sequences.push(...subsequencesSequences(sequence, _subsequences, subsequencesAll))
 
       _subsequences = _subsequences.slice(1)
     }
 
-    const subsequenceLast = sequence[sequence.length-1]
-    const first = subsequenceLast ? subsequenceLast[subsequenceLast.length-1] : -1
-
-    if (!containsSubsequences(first, subsequence[0], subsequencesAll.reduce((_subsequences, subsequences) => {_subsequences.push(...subsequences); return _subsequences}, []))) sequences.push(...subsequencesSequences(_sequence, _subsequences, subsequencesAll))
+    if (containsSubsequences(subsequenceLast ? subsequenceLast[subsequenceLast.length-1] : -1, subsequence[0], subsequencesAll.reduce((_subsequences, subsequences) => {_subsequences.push(...subsequences); return _subsequences}, []))) return
+    sequences.push(...subsequencesSequences(_sequence, _subsequences, subsequencesAll))
   })
 
   return sequences
