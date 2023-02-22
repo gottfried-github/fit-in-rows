@@ -1,6 +1,6 @@
 // const {randomBinaryProportionateSeqSecond} = require('./test-helpers')
 // const {permutationsToCombinations, getSize, isRatioEqual, sortItemsByType} = require('./schema-permutations')
-import {size, delta, isDeltaEmpty, overlaps} from './helpers.js'
+import {size, delta, isDeltaEmpty, overlaps, containsSubsequences} from './helpers.js'
 
 /**
 function main(groupSchemas) {
@@ -53,8 +53,7 @@ function cascadeSubsequence(subS, sequences, cascade) {
   return [s, ...cascade(subS, sequences, cascade)]
 }
 
-function subsequencesSequences(sequence, subsequences) {
-  console.log('subsequencesSequences - sequence, subsequences:', sequence, subsequences)
+function subsequencesSequences(sequence, subsequences, subsequencesAll) {
   const sequences = []
 
   subsequences[0].forEach((subsequence) => {
@@ -69,22 +68,24 @@ function subsequencesSequences(sequence, subsequences) {
 
     // skip overlapping subsequences
     while (overlaps(subsequence, _subsequences[0][0])) {
-      console.log('subsequencesSequences, overlaps - a, b:', subsequence, _subsequences[0][0])
+      const subsequenceLast = sequence[sequence.length-1]
+      const first = subsequenceLast ? subsequenceLast[subsequenceLast.length-1] : -1
+      
       if (_subsequences.length === 1) {
-        sequences.push(...subsequencesSequences(sequence, _subsequences))
-        sequences.push(_sequence)
-        console.log('subsequencesSequences, sequences:', sequences)
+        if (!containsSubsequences(first, subsequence[0], subsequencesAll.reduce((_subsequences, subsequences) => {_subsequences.push(...subsequences); return _subsequences}, []))) sequences.push(...subsequencesSequences(sequence, _subsequences, subsequencesAll))
+        if (!containsSubsequences(first, subsequence[0], subsequencesAll.reduce((_subsequences, subsequences) => {_subsequences.push(...subsequences); return _subsequences}, []))) sequences.push(_sequence)
         return
       } 
 
-      sequences.push(...subsequencesSequences(sequence, _subsequences))
-      console.log('subsequencesSequences, sequences:', sequences)
+      if (!containsSubsequences(first, subsequence[0], subsequencesAll.reduce((_subsequences, subsequences) => {_subsequences.push(...subsequences); return _subsequences}, []))) sequences.push(...subsequencesSequences(sequence, _subsequences, subsequencesAll))
 
       _subsequences = _subsequences.slice(1)
     }
 
-    sequences.push(...subsequencesSequences(_sequence, _subsequences))
-    console.log('subsequencesSequences, sequences:', sequences)
+    const subsequenceLast = sequence[sequence.length-1]
+    const first = subsequenceLast ? subsequenceLast[subsequenceLast.length-1] : -1
+
+    if (!containsSubsequences(first, subsequence[0], subsequencesAll.reduce((_subsequences, subsequences) => {_subsequences.push(...subsequences); return _subsequences}, []))) sequences.push(...subsequencesSequences(_sequence, _subsequences, subsequencesAll))
   })
 
   return sequences

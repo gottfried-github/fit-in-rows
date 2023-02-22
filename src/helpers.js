@@ -6,7 +6,7 @@
 function overlaps(a, b) {
   let i = 0, l = a.length
   for (i; i<l; i++) {
-    if (b.includes(a[i])) return true
+	if (b.includes(a[i])) return true
   }
 
   return false
@@ -21,8 +21,8 @@ function delta(space, sequence) {
   if (!Array.isArray(space)) throw new Error()
 
   return space.reduce((d, i) => {
-    if (sequence.includes(i)) return d
-    d.push(i); return d
+	if (sequence.includes(i)) return d
+	d.push(i); return d
   }, [])
 }
 
@@ -40,15 +40,31 @@ function size(sequence) {
 function isDeltaEmpty(space, sequence) {
   const _delta = delta(space, sequence)
   return Array.isArray(_delta)
-    ? 0 === _delta.length
-    : 0 === _delta
+	? 0 === _delta.length
+	: 0 === _delta
+}
+
+/**
+ * @param {Number} first a `ref` to an `item`
+ * @param {Number} last a `ref` to an `item`
+ * @param {Array} subsequences an array of `subsequence`s
+ * @returns {Boolean} whether at least one `subsequence` is contained between `first` and `last`
+*/
+function containsSubsequences(first, last, subsequences) {
+	for (const subsequence of subsequences) {
+		if (subsequence[0] <= first) continue
+		if (subsequence[subsequence.length-1] < last) return true
+		return false
+	}
+
+	return false
 }
 
 /*
 // this hasn't been run
 function isAdjacent(a, b) {
   return b[0] - a[a.length-1] === 1
-    || a[0] - b[b.length-1] === 1
+	|| a[0] - b[b.length-1] === 1
 }
 
 @param {Subsequence} [a, b]
@@ -57,7 +73,7 @@ function overlaps(a, b) {
 
   let i = 0, l = a.items.length
   for (i; i<l; i++) {
-    if (bIs.includes(a.location+i)) return true
+	if (bIs.includes(a.location+i)) return true
   }
 
   return false
@@ -65,17 +81,17 @@ function overlaps(a, b) {
 
 function overlaps(a, b) {
   return doOverlaps(
-    a.items.map((item, i) => a.i+i)
-    b.items.map((item, i) => b.i+i)
+	a.items.map((item, i) => a.i+i)
+	b.items.map((item, i) => b.i+i)
   )
 }
 
   @param {[Int]} a, @param {[Int]} b
-    where Int is the position of the respective item in the source `sequence`
+	where Int is the position of the respective item in the source `sequence`
 function doOverlaps(a, b) {
   let i = 0, l = a.length
   for (i; i<l; i++) {
-    if (b.includes(a[i])) return true
+	if (b.includes(a[i])) return true
   }
 
   return false
@@ -83,5 +99,5 @@ function doOverlaps(a, b) {
 */
 
 export {
-  delta, size, overlaps, isDeltaEmpty,
+  delta, size, overlaps, isDeltaEmpty, containsSubsequences
 }
