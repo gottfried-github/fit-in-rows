@@ -53,38 +53,83 @@ function cascadeSubsequence(subS, sequences, cascade) {
   return [s, ...cascade(subS, sequences, cascade)]
 }
 
-/**
-  @param {[Number || Array]} space array of `space` or `schema` params to pass to formHomogeneousSubsequences
-  @param {Array} sequence a `sequence`
-*/
-function formSubsequences(space, sequence) {
-  return space.reduce((bySpace, space) => {
-    bySpace.push(formHomogeneousSubsequences(space, [...sequence]))
-    return bySpace
-  }, [])
+function subsequencesSequences(sequence, subsequences) {
+  console.log('subsequencesSequences - sequence, subsequences:', sequence, subsequences)
+  const sequences = []
+
+  subsequences[0].forEach((subsequence) => {
+    const _sequence = [...sequence, subsequence]
+    
+    if (subsequences.length === 1) {
+      sequences.push(_sequence)
+      return
+    }
+
+    let _subsequences = subsequences.slice(1)
+
+    // skip overlapping subsequences
+    while (overlaps(subsequence, _subsequences[0][0])) {
+      console.log('subsequencesSequences, overlaps - a, b:', subsequence, _subsequences[0][0])
+      if (_subsequences.length === 1) {
+        sequences.push(...subsequencesSequences(sequence, _subsequences))
+        sequences.push(_sequence)
+        console.log('subsequencesSequences, sequences:', sequences)
+        return
+      } 
+
+      sequences.push(...subsequencesSequences(sequence, _subsequences))
+      console.log('subsequencesSequences, sequences:', sequences)
+
+      _subsequences = _subsequences.slice(1)
+    }
+
+    sequences.push(...subsequencesSequences(_sequence, _subsequences))
+    console.log('subsequencesSequences, sequences:', sequences)
+  })
+
+  return sequences
 }
 
 /**
-  @param {Number || Array} space space to fill (either a `space` or a `schema`)
-  @param {Array} sequence a `sequence`
-  @returns {Array} of `subsequence`s, represented by `ref`s, where each `subsequence`'s first `item` is subsequent to the previous `item` in the `sequence`
+ * @param {Number || Array} space a `space` or a `schema`
+ * @param {Array} sequence a `sequence`
 */
-function formHomogeneousSubsequences(space, sequence) {
-  const subSs = []
+function subsequence(space, sequence) {
+  const subS = Array.isArray(space)
+  ? fillSchema([...space], sequence, [], fillSchema)
+  : fillSpace(space, sequence, [], fillSpace)
 
-  const originalLength = sequence.length
-  while (sequence.length>0) {
-    const subS = fill(space, sequence)
+  // only if all space is filled return the subsequence
+  if (isDeltaEmpty(space, subS)) return subS.map( 
+      (t,i) => i // store refs to `items` in the `sequence` rather than the `items` themselves
+  )
 
-    // store refs to `items` in the `sequence` rather than the `items` themselves
-    if (isDeltaEmpty(space, subS)) subSs.push(subS.map(
-      (t,i) => (originalLength - sequence.length) + i
-    ))
+  return null
+}
 
-    sequence.shift()
-  }
+/**
+  @param {[Number || Array]} space array of `space`s or `schema`s
+  @param {Array} sequence a `sequence`
+  @returns {[Array]} arrays of `subsequence`s (represented by `ref`s), respective to the given `space`s, starting from each item in the `sequence`
+*/
+function subsequences(space, sequence) {
+    const subSs = sequence.reduce((subSs, item, i) => {
+      const subSsSpace = space.reduce((subSs, space) => {
+        const subS = subsequence(space, sequence.slice(i))
+        if (!subS) return subSs
 
-  return subSs
+        subSs.push(subS.map(ref => i + ref))
+
+        return subSs
+      }, [])
+
+      if (!subSsSpace.length) return subSs
+      
+      subSs.push(subSsSpace)
+      return subSs
+    }, [])
+
+    return subSs
 }
 
 function fill(space, sequence) {
@@ -194,8 +239,9 @@ function formSideByOrderedSchema(schema, sSrc, s, formSide) {
 */
 
 export {
+  subsequencesSequences,
   negateOverlaps, doNegateOverlaps, cascadeSubsequence,
-  formSubsequences, formHomogeneousSubsequences,
+  subsequences,
 
   fillSpace, fillSchema, fill,
 }
