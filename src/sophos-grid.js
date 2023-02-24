@@ -59,7 +59,7 @@ function subsequencesSequences(sequence, subsequences, subsequencesAll) {
 */
 function subsequence(space, sequence) {
 	const subS = Array.isArray(space)
-	? fillSchema([...space], sequence, [], fillSchema)
+	? fillSchema(space, sequence, [], fillSchema)
 	: fillSpace(space, sequence, [], fillSpace)
 	
 	// only if all space is filled return the subsequence
@@ -102,7 +102,9 @@ function subsequences(space, sequence) {
 function fillSpace(d, sSrc, s, fill) {
 	if (sSrc.length === 0) return s
 	
-	const itemSpace = sSrc.shift()
+	const _sSrc = [...sSrc]
+
+	const itemSpace = _sSrc.shift()
 	const dNew = d - itemSpace
 	
 	if (dNew < 0) return s
@@ -111,7 +113,7 @@ function fillSpace(d, sSrc, s, fill) {
 	
 	if (0 === dNew) return s
 	
-	return fill(dNew, sSrc, s, fill)
+	return fill(dNew, _sSrc, s, fill)
 }
 
 /**
@@ -120,19 +122,23 @@ function fillSpace(d, sSrc, s, fill) {
 function fillSchema(d, sSrc, s, fill) {
 	if (sSrc.length === 0) return s
 	
-	const itemSpace = sSrc.shift()
+	const _sSrc = [...sSrc]
+
+	const itemSpace = _sSrc.shift()
 	if (!d.includes(itemSpace)) return s
 	
-	d.splice(d.indexOf(itemSpace), 1)
 	s.push(itemSpace)
 	
-	if (d.length === 0) return s
-	return fill(d, sSrc, s, fill)
+	const _d = [...d]; _d.splice(d.indexOf(itemSpace), 1)
+	
+	if (_d.length === 0) return s
+
+	return fill(_d, _sSrc, s, fill)
 }
 	
 export {
 	subsequencesSequences,
 	subsequences,
 	
-	fillSpace, fillSchema, fill,
+	fillSpace, fillSchema,
 }
