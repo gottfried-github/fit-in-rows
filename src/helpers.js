@@ -20,10 +20,17 @@ function delta(space, sequence) {
   if ('number' === typeof(space)) return space - size(sequence)
   if (!Array.isArray(space)) throw new Error()
 
-  return space.reduce((d, i) => {
-	if (sequence.includes(i)) return d
-	d.push(i); return d
-  }, [])
+  const delta = sequence.reduce((d, i) => {
+	if (d.length === 0) return d
+	if (!d.includes(i)) return d
+
+	d.splice(d.indexOf(i), 1)
+	return d
+  }, [...space])
+
+  console.log('delta, delta:', delta)
+
+  return delta
 }
 
 /**
