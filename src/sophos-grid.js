@@ -53,6 +53,12 @@ function cascadeSubsequence(subS, sequences, cascade) {
   return [s, ...cascade(subS, sequences, cascade)]
 }
 
+/**
+ * @param {Array} sequence a `sequence`
+ * @param {Array} subsequences arrays of `subsequence`s as returned by `subsequences`
+ * @param {Array} subsequencesAll arrays of `subsequence`s as returned by `subsequences`
+ * @returns {Array} array of sequences of `subsequence`s where none of the `subsequence`s overlap
+*/
 function subsequencesSequences(sequence, subsequences, subsequencesAll) {
   const sequences = []
 
@@ -68,29 +74,33 @@ function subsequencesSequences(sequence, subsequences, subsequencesAll) {
 
     let _subsequences = subsequences.slice(1)
 
-    // skip overlapping subsequences
+    // detect overlapping subsequence
     while (overlaps(subsequence, _subsequences[0][0])) {      
       if (_subsequences.length === 1) {
+        // skip recursion if space between the sequence and the subsequence can contain subsequences
         if (containsSubsequences(subsequenceLast ? subsequenceLast[subsequenceLast.length-1] : -1, subsequence[0], subsequencesAll.reduce((_subsequences, subsequences) => {_subsequences.push(...subsequences); return _subsequences}, []))) return
         
-        sequences.push(...subsequencesSequences(sequence, _subsequences, subsequencesAll))
+        sequences.push(...subsequencesSequences(sequence, _subsequences, subsequences))
         sequences.push(_sequence)
         
         return
       } 
 
+      // skip recursion if space between the sequence and the subsequence can contain subsequences
       if (containsSubsequences(subsequenceLast ? subsequenceLast[subsequenceLast.length-1] : -1, subsequence[0], subsequencesAll.reduce((_subsequences, subsequences) => {_subsequences.push(...subsequences); return _subsequences}, []))) {
         _subsequences = _subsequences.slice(1)
         return
       }
       
-      sequences.push(...subsequencesSequences(sequence, _subsequences, subsequencesAll))
+      sequences.push(...subsequencesSequences(sequence, _subsequences, subsequences))
 
       _subsequences = _subsequences.slice(1)
     }
 
+    // skip recursion if space between the sequence and the subsequence can contain subsequences
     if (containsSubsequences(subsequenceLast ? subsequenceLast[subsequenceLast.length-1] : -1, subsequence[0], subsequencesAll.reduce((_subsequences, subsequences) => {_subsequences.push(...subsequences); return _subsequences}, []))) return
-    sequences.push(...subsequencesSequences(_sequence, _subsequences, subsequencesAll))
+    
+    sequences.push(...subsequencesSequences(_sequence, _subsequences, subsequences))
   })
 
   return sequences
