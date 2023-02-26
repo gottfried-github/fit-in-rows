@@ -1,6 +1,18 @@
 import {size, delta, isDeltaEmpty, overlaps, containsSubsequences} from './helpers.js'
 import {fillSpace, fillSchema} from './subsequence.js'
 
+function cutSubsequences(subsequence, subsequences) {
+    while (subsequences.length && overlaps(subsequence, subsequences[0][0])) subsequences = subsequences.slice(1)
+
+    return subsequences
+}
+
+function cutSequence(subsequence, sequence) {
+    while (sequence.length && overlaps(sequence[sequence.length-1], subsequence)) sequence = sequence.slice(0, sequence.length-1)
+
+    return sequence
+}
+
 /**
 * @param {Array} sequence a `sequence`
 * @param {Array} subsequences arrays of `subsequence`s as returned by `subsequences`
@@ -10,46 +22,25 @@ import {fillSpace, fillSchema} from './subsequence.js'
 function subsequencesSequences(sequence, subsequences, subsequencesAll) {
 	const sequences = []
 	
-	const subsequenceLast = sequence[sequence.length-1]
-	
-	subsequences[0].forEach((subsequence) => {
-		const _sequence = [...sequence, subsequence]
-		
-		if (subsequences.length === 1) {
-			sequences.push(_sequence)
-			return
-		}
-		
-		let _subsequences = subsequences.slice(1)
-		
-		// detect overlapping subsequence
-		while (overlaps(subsequence, _subsequences[0][0])) {      
-			if (_subsequences.length === 1) {
-				// skip recursion if space between the sequence and the subsequence can contain subsequences
-				if (containsSubsequences(subsequenceLast ? subsequenceLast[subsequenceLast.length-1] : -1, subsequence[0], subsequencesAll.reduce((_subsequences, subsequences) => {_subsequences.push(...subsequences); return _subsequences}, []))) return
-				
-				sequences.push(...subsequencesSequences(sequence, _subsequences, subsequences))
-				sequences.push(_sequence)
-				
-				return
-			} 
-			
-			// skip recursion if space between the sequence and the subsequence can contain subsequences
-			if (containsSubsequences(subsequenceLast ? subsequenceLast[subsequenceLast.length-1] : -1, subsequence[0], subsequencesAll.reduce((_subsequences, subsequences) => {_subsequences.push(...subsequences); return _subsequences}, []))) {
-				_subsequences = _subsequences.slice(1)
-				return
-			}
-			
-			sequences.push(...subsequencesSequences(sequence, _subsequences, subsequences))
-			
-			_subsequences = _subsequences.slice(1)
-		}
-		
-		// skip recursion if space between the sequence and the subsequence can contain subsequences
-		if (containsSubsequences(subsequenceLast ? subsequenceLast[subsequenceLast.length-1] : -1, subsequence[0], subsequencesAll.reduce((_subsequences, subsequences) => {_subsequences.push(...subsequences); return _subsequences}, []))) return
-		
-		sequences.push(...subsequencesSequences(_sequence, _subsequences, subsequences))
-	})
+    if (!subsequences.length) return [sequence]
+    
+    for (const subsequence of subsequences[0]) {
+        console.log('subsequencesSequences, forEach - sequence, subsequence:', sequence, subsequence)
+
+        if (!sequence.length) {
+            sequences.push(...subsequencesSequences([subsequence], subsequences.slice(1)))
+            continue
+        }
+
+        if (!overlaps(sequence[sequence.length-1], subsequence)) {
+            sequences.push(...subsequencesSequences([...sequence, subsequence], subsequences.slice(1)))
+            continue
+        }
+
+        const _subsequences = cutSubsequences(sequence[sequence.length-1], subsequences)
+        sequences.push(...subsequencesSequences(sequence, _subsequences))
+        break
+    }
 	
 	return sequences
 }

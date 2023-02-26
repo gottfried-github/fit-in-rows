@@ -21,8 +21,6 @@ function delta(space, sequence) {
 		return d
 	}, [...space])
 	
-	console.log('delta, delta:', delta)
-	
 	return delta
 }
 
