@@ -7,19 +7,13 @@ function cutSubsequences(subsequence, subsequences) {
     return subsequences
 }
 
-function cutSequence(subsequence, sequence) {
-    while (sequence.length && overlaps(sequence[sequence.length-1], subsequence)) sequence = sequence.slice(0, sequence.length-1)
-
-    return sequence
-}
-
 /**
 * @param {Array} sequence a `sequence`
 * @param {Array} subsequences arrays of `subsequence`s as returned by `subsequences`
 * @param {Array} subsequencesAll arrays of `subsequence`s as returned by `subsequences`
 * @returns {Array} array of sequences of `subsequence`s where none of the `subsequence`s overlap
 */
-function subsequencesSequences(sequence, subsequences, subsequencesAll) {
+function subsequencesSequences(sequence, subsequences) {
 	const sequences = []
 	
     if (!subsequences.length) return [sequence]
