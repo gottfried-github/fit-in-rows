@@ -1,10 +1,29 @@
 import {size, delta, isDeltaEmpty, overlaps, containsSubsequences} from './helpers.js'
 import {fillSpace, fillSchema} from './subsequence.js'
 
-function cutSubsequences(subsequence, subsequences) {
-    while (subsequences.length && overlaps(subsequence, subsequences[0][0])) subsequences = subsequences.slice(1)
+function subsequencesSequences(_subsequences) {
+    let {sequences, subsequences} = _subsequencesSequences([], _subsequences)
 
-    return subsequences
+    while (subsequences.length) {
+        console.log('subsequencesSequences - subsequences:', subsequences)
+        const res = _subsequencesSequences([], subsequences)
+
+        sequences.push(...res.sequences)
+        subsequences = res.subsequences
+    }
+
+    return sequences
+}
+
+function cutSubsequences(subsequence, subsequences) {
+    const remainder = []
+
+    while (subsequences.length && overlaps(subsequence, subsequences[0][0])) {
+        remainder.unshift(subsequences[0])
+        subsequences = subsequences.slice(1)
+    }
+
+    return {subsequences, remainder}
 }
 
 /**
@@ -13,30 +32,45 @@ function cutSubsequences(subsequence, subsequences) {
 * @param {Array} subsequencesAll arrays of `subsequence`s as returned by `subsequences`
 * @returns {Array} array of sequences of `subsequence`s where none of the `subsequence`s overlap
 */
-function subsequencesSequences(sequence, subsequences) {
-	const sequences = []
+function _subsequencesSequences(sequence, subsequences) {
+	const res = {
+        sequences: [],
+        subsequences: []
+    }
 	
-    if (!subsequences.length) return [sequence]
+    if (!subsequences.length) {
+        res.sequences.push(sequence)
+        return res
+    }
     
     for (const subsequence of subsequences[0]) {
-        console.log('subsequencesSequences, forEach - sequence, subsequence:', sequence, subsequence)
-
         if (!sequence.length) {
-            sequences.push(...subsequencesSequences([subsequence], subsequences.slice(1)))
+            const _res = _subsequencesSequences([subsequence], subsequences.slice(1))
+            res.sequences.push(..._res.sequences)
+            res.subsequences.push(..._res.subsequences)
+
             continue
         }
 
         if (!overlaps(sequence[sequence.length-1], subsequence)) {
-            sequences.push(...subsequencesSequences([...sequence, subsequence], subsequences.slice(1)))
+            const _res = _subsequencesSequences([...sequence, subsequence], subsequences.slice(1))
+            res.sequences.push(..._res.sequences)
+            res.subsequences.push(..._res.subsequences)
+
             continue
         }
 
-        const _subsequences = cutSubsequences(sequence[sequence.length-1], subsequences)
-        sequences.push(...subsequencesSequences(sequence, _subsequences))
+        const cutRes = cutSubsequences(sequence[sequence.length-1], subsequences)
+        res.subsequences.push(...cutRes.remainder)
+
+        const _res = _subsequencesSequences(sequence, cutRes.subsequences)
+        res.sequences.push(..._res.sequences)
+        res.subsequences.push(..._res.subsequences)
+        
         break
     }
 	
-	return sequences
+	return res
 }
 
 /**
