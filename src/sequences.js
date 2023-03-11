@@ -1,10 +1,37 @@
 import {size, delta, isDeltaEmpty, overlaps, containsSubsequences} from './helpers.js'
 import {fillSpace, fillSchema} from './subsequence.js'
 
-function cutSubsequences(subsequence, subsequences) {
-    while (subsequences.length && overlaps(subsequence, subsequences[0][0])) subsequences = subsequences.slice(1)
+function subsequencesSequences(subsequences) {
+    let {sequences, subsequencesUnvisited} = _subsequencesSequences([], subsequences.map((v, i) => i), subsequences, [], [])
 
-    return subsequences
+    while (subsequencesUnvisited.length) {
+        console.log('subsequencesSequences - subsequencesUnvisited:', subsequencesUnvisited)
+        const res = _subsequencesSequences([], subsequencesUnvisited, subsequences, [], [])
+
+        sequences.push(...res.sequences)
+        subsequencesUnvisited = res.subsequencesUnvisited
+    }
+
+    return sequences
+}
+
+function cutSubsequences(subsequence, subsequencesMap, subsequences) {
+    const remainder = []
+
+    while (subsequencesMap.length && overlaps(subsequence, subsequences[subsequencesMap[0]][0])) {
+        remainder.unshift(subsequencesMap[0])
+        subsequencesMap = subsequencesMap.slice(1)
+    }
+
+    return {subsequencesMap, remainder}
+}
+
+function filterUnvisited(subsequencesUnvisited, subsequencesVisited) {
+    for (const sS of subsequencesVisited) {
+        if (subsequencesUnvisited.includes(sS)) subsequencesUnvisited.splice(subsequencesUnvisited.indexOf(sS), 1)
+    }
+
+    return subsequencesUnvisited
 }
 
 /**
@@ -13,30 +40,45 @@ function cutSubsequences(subsequence, subsequences) {
 * @param {Array} subsequencesAll arrays of `subsequence`s as returned by `subsequences`
 * @returns {Array} array of sequences of `subsequence`s where none of the `subsequence`s overlap
 */
-function subsequencesSequences(sequence, subsequences) {
-	const sequences = []
+function _subsequencesSequences(sequence, subsequencesMap, subsequences, subsequencesVisited, subsequencesUnvisited) {
+    const sequences = []
 	
-    if (!subsequences.length) return [sequence]
-    
-    for (const subsequence of subsequences[0]) {
-        console.log('subsequencesSequences, forEach - sequence, subsequence:', sequence, subsequence)
+    if (!subsequencesMap.length) {
+        sequences.push(sequence)
+        return {sequences, subsequencesUnvisited}
+    }
 
+    for (const subsequence of subsequences[subsequencesMap[0]]) {
         if (!sequence.length) {
-            sequences.push(...subsequencesSequences([subsequence], subsequences.slice(1)))
+            subsequencesVisited.push(subsequencesMap[0])
+            filterUnvisited(subsequencesUnvisited, subsequencesVisited)
+
+            const res = _subsequencesSequences([subsequence], subsequencesMap.slice(1), subsequences, subsequencesVisited, subsequencesUnvisited)
+            sequences.push(...res.sequences)
+
             continue
         }
 
         if (!overlaps(sequence[sequence.length-1], subsequence)) {
-            sequences.push(...subsequencesSequences([...sequence, subsequence], subsequences.slice(1)))
+            subsequencesVisited.push(subsequencesMap[0])    
+            filterUnvisited(subsequencesUnvisited, subsequencesVisited)
+
+            const res = _subsequencesSequences([...sequence, subsequence], subsequencesMap.slice(1), subsequences, subsequencesVisited, subsequencesUnvisited)
+            sequences.push(...res.sequences)
+            
             continue
         }
 
-        const _subsequences = cutSubsequences(sequence[sequence.length-1], subsequences)
-        sequences.push(...subsequencesSequences(sequence, _subsequences))
+        const cutRes = cutSubsequences(sequence[sequence.length-1], subsequencesMap, subsequences)
+        subsequencesUnvisited.push(...cutRes.remainder)
+        
+        const res = _subsequencesSequences(sequence, cutRes.subsequencesMap, subsequences, subsequencesVisited, subsequencesUnvisited)
+        sequences.push(...res.sequences)
+        
         break
     }
 	
-	return sequences
+	return {sequences, subsequencesUnvisited}
 }
 
 /**
