@@ -40,42 +40,30 @@ function filterUnvisited(subsequencesUnvisited, subsequencesVisited) {
 * @param {Array} subsequencesAll arrays of `subsequence`s as returned by `subsequences`
 * @returns {Array} array of sequences of `subsequence`s where none of the `subsequence`s overlap
 */
-function _subsequencesSequences(sequence, subsequencesMap, subsequences, subsequencesUnvisited, subsequencesVisited) {
-    const sequences = [] //, subsequencesUnvisited = []
+function _subsequencesSequences(sequence, subsequencesMap, subsequences, subsequencesVisited, subsequencesUnvisited) {
+    const sequences = []
 	
     if (!subsequencesMap.length) {
         sequences.push(sequence)
         return {sequences, subsequencesUnvisited}
     }
-    
-    console.log('_subsequencesSequences, subsequencesMap[0]:', subsequencesMap[0], subsequencesUnvisited)
 
     for (const subsequence of subsequences[subsequencesMap[0]]) {
         if (!sequence.length) {
-            console.log('_subsequencesSequences, sequence empty - subsequencesUnvisited:', subsequencesUnvisited, subsequencesMap[0])
-
             subsequencesVisited.push(subsequencesMap[0])
             filterUnvisited(subsequencesUnvisited, subsequencesVisited)
 
-            // if subsequence previously unvisited, it's visited now
-            // if (subsequencesUnvisited.includes(subsequencesMap[0])) subsequencesUnvisited.splice(subsequencesUnvisited.indexOf(subsequencesMap[0]), 1)
-
-            const res = _subsequencesSequences([subsequence], subsequencesMap.slice(1), subsequences, subsequencesUnvisited, subsequencesVisited)
+            const res = _subsequencesSequences([subsequence], subsequencesMap.slice(1), subsequences, subsequencesVisited, subsequencesUnvisited)
             sequences.push(...res.sequences)
 
             continue
         }
 
         if (!overlaps(sequence[sequence.length-1], subsequence)) {
-            console.log('_subsequencesSequences, !overlaps - subsequencesUnvisited:', subsequencesUnvisited, subsequencesMap[0])
-
             subsequencesVisited.push(subsequencesMap[0])    
             filterUnvisited(subsequencesUnvisited, subsequencesVisited)
 
-            // if subsequence previously unvisited, it's visited now
-            // if (subsequencesUnvisited.includes(subsequencesMap[0])) subsequencesUnvisited.splice(subsequencesUnvisited.indexOf(subsequencesMap[0]), 1)
-
-            const res = _subsequencesSequences([...sequence, subsequence], subsequencesMap.slice(1), subsequences, subsequencesUnvisited, subsequencesVisited)
+            const res = _subsequencesSequences([...sequence, subsequence], subsequencesMap.slice(1), subsequences, subsequencesVisited, subsequencesUnvisited)
             sequences.push(...res.sequences)
             
             continue
@@ -84,13 +72,8 @@ function _subsequencesSequences(sequence, subsequencesMap, subsequences, subsequ
         const cutRes = cutSubsequences(sequence[sequence.length-1], subsequencesMap, subsequences)
         subsequencesUnvisited.push(...cutRes.remainder)
         
-        // console.log('_subsequencesSequences, overlaps - subsequencesUnvisited', subsequencesUnvisited, subsequencesMap[0])
-        
-        const res = _subsequencesSequences(sequence, cutRes.subsequencesMap, subsequences, subsequencesUnvisited, subsequencesVisited)
+        const res = _subsequencesSequences(sequence, cutRes.subsequencesMap, subsequences, subsequencesVisited, subsequencesUnvisited)
         sequences.push(...res.sequences)
-        
-        // if subsequence previously unvisited, it's visited now
-        // if (subsequencesUnvisited.includes(subsequencesMap[0])) subsequencesUnvisited.splice(subsequencesUnvisited.indexOf(cutRes.subsequencesMap[0]), 1)
         
         break
     }
