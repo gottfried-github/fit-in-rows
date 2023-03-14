@@ -1,10 +1,12 @@
 ## Description
-Break a sequence of items into rows of specified structure such that the rows are consecutive. Work in progress: the condition that the rows are consecutive is not achieved yet.
+Generate all possible ways of breaking a sequence of items into rows of a specified structure.
 
 ### Specifying rows
 Items are either wide or narrow. A wide item takes `2` of [`space`](#space); a narrow one takes `1`.
 
-The structure of a row is specified by total amount of [`space`](#space) items in it constitute. For example, the [`space`](#space) of `3` says that a row can only contain either three narrow items or one narrow and one wide item - but no more or less than that.
+The structure of a row can be specified in two ways. One way is to specify it by specifying total amount of [`space`](#space) items in the row constitute. For example, the [`space`](#space) of `3` says that a row can only contain either three narrow items or one narrow and one wide item - but no more or less than that.
+
+Another way of specifying the structure of a row is to specify the kind of items to include in a row and the quantity of each specified kind by specifying a set of items with a [`schema`](#schema).
 
 ### Breaking the sequence
 First, I generate `subsequence`s of given [`space`](#space) (representing rows) starting from each `item` in the `sequence` (in `formHomogenousSubsequences`). Then, out of the generated `subsequence`s, I form sequences where none of the `subsequence`s overlap (`cascadeSubsequence`).
@@ -30,9 +32,7 @@ An array of arrays where each array contains `subsequence`s starting with the sa
 A reference to an `item` in a `sequence` by the `item`'s index
 
 #### Schema
-A *set* of `items`. For a `subsequence`, it specifies what `items` and in what quantities a `subsequence` should contain.
-For example, for schema `1,2` and a sequence `1,2, 1,1,1, 2,1`, the following subsequences will be generated:
-`1,2`, `2,1`, `1,2`, `2,1`.
+A *set* of `item`s. It specifies the kind of items which to include in a `subsequence` and the quantity of each of the specified kinds. Each specified kind is included once, unless repeated. For example, for a schema of `1,2` and a sequence `1,2, 1,1,1, 2,1`, the following `subsequence`s will be generated: `1,2`, `2,1`, `1,2`, `2,1`; for a schema of `1,1,1` and the same sequence, the following will be generated: `1,1,1`.
 
 ### Algorithms
 #### `subsequences`
