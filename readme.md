@@ -9,7 +9,7 @@ The structure of a row can be specified in two ways. One way is to specify it by
 Another way of specifying the structure of a row is to specify the kind of items to include in a row and the quantity of each specified kind by specifying a set of items with a [`schema`](#schema).
 
 ### Breaking the sequence
-First, I generate `subsequence`s of given [`space`](#space) (representing rows) starting from each `item` in the `sequence` (in [`subsequences`](#algorithms)). Then, out of the generated `subsequence`s, I form sequences where none of the `subsequence`s overlap (in [`subsequencesSequences`](#subsequencesSequences)).
+First, I generate `subsequence`s of given [`space`](#space) or [`schema`](#schema) (representing rows) starting from each [`item`](#item) in the [`sequence`](#sequence) (in [`subsequences`](#algorithms)). Then, out of the generated [`subsequences`](#subsequence), I form sequences where none of the [`subsequences`](#subsequence) overlap (in [`subsequencesSequences`](#subsequencesSequences)).
 
 ## Technical overview
 ### Semantics
