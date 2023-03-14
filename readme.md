@@ -36,14 +36,14 @@ A *set* of `item`s. It specifies the kind of items which to include in a `subseq
 
 ### Algorithms
 #### `subsequences`
-Form `subsequence`s with each given `space` starting from each `item` in the given `sequence`. I.e., take each `item` in the given `sequence` as a starting `item` for a `subsequence` with given `space`. 
+Form `subsequence`s with each given `space` starting from each `item` in the given `sequence`. I.e., take each `item` in the given `sequence` as a starting `item` for a `subsequence` with a given `space`. 
 
 Returns `subsequences`.
 
 #### `subsequencesSequences`
-Produces sequences of `subsequence`s where none of the `subsequence`s overlap. 
+Out of `subsequences`, produces sequences of `subsequence`s where none of the `subsequence`s overlap. 
 
-For each `subsequence` in `subsequences` iterate over the remaining `subsequences`, passing the sequence of non-overlapping `subsequence`s, formed so far. For each `subsequence` that doesn't overlap with the sequence, append the `subsequence` to the sequence. If the `subsequence` is the last one in `subsequences`, append the formed sequence to sequences.
+For each `subsequence` in `subsequences` iterate over the remaining non-overlapping `subsequences`. Append each `subsequence` to a sequence of `subsequence`s, formed so far in the recursion.
 
 #### `fillSpace`
 Form a `subsequence` by unshifting `item`s from the given `sequence` until the given `space` is filled in the `subsequence` or leave the `space` unfilled if no matching `item`s are present in the `sequence`.
