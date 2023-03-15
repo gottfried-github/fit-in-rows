@@ -27,7 +27,7 @@ function subsequencesSequences(sequence, subsequences, subsequencesAll) {
 				// skip recursion if space between the sequence and the subsequence can contain subsequences
 				if (containsSubsequences(subsequenceLast ? subsequenceLast[subsequenceLast.length-1] : -1, subsequence[0], subsequencesAll.reduce((_subsequences, subsequences) => {_subsequences.push(...subsequences); return _subsequences}, []))) return
 				
-				sequences.push(...subsequencesSequences(sequence, _subsequences, subsequences))
+				sequences.push(...subsequencesSequences(sequence, _subsequences, subsequencesAll))
 				sequences.push(_sequence)
 				
 				return
@@ -39,7 +39,7 @@ function subsequencesSequences(sequence, subsequences, subsequencesAll) {
 				return
 			}
 			
-			sequences.push(...subsequencesSequences(sequence, _subsequences, subsequences))
+			sequences.push(...subsequencesSequences(sequence, _subsequences, subsequencesAll))
 			
 			_subsequences = _subsequences.slice(1)
 		}
@@ -47,7 +47,7 @@ function subsequencesSequences(sequence, subsequences, subsequencesAll) {
 		// skip recursion if space between the sequence and the subsequence can contain subsequences
 		if (containsSubsequences(subsequenceLast ? subsequenceLast[subsequenceLast.length-1] : -1, subsequence[0], subsequencesAll.reduce((_subsequences, subsequences) => {_subsequences.push(...subsequences); return _subsequences}, []))) return
 		
-		sequences.push(...subsequencesSequences(_sequence, _subsequences, subsequences))
+		sequences.push(...subsequencesSequences(_sequence, _subsequences, subsequencesAll))
 	})
 	
 	return sequences
