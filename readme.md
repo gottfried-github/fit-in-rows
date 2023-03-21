@@ -41,15 +41,15 @@ A reference to an [`item`](#item) in a [`sequence`](#sequence) by the [`item's`]
 A *set* of [`items`](#item). It specifies the kind of items which to include in a [`subsequence`](#subsequence) and the quantity of each of the specified kinds. Each specified kind is included once, unless repeated. For example, for a schema of `1,2` and a sequence `1,2, 1,1,1, 2,1`, the following [`subsequences`](#subsequence) will be generated: `1,2`, `2,1`, `1,2`, `2,1`; for a schema of `1,1,1` and the same sequence, the following will be generated: `1,1,1`.
 
 ### Algorithms
-#### `subsequences`
+#### [subsequences](https://github.com/gottfried-github/fit-in-rows/blob/e4b443aa5bcfd8f6314bba0545a00d26591297e4/src/index.js#L87)
 Form [`subsequences`](#subsequence) with each given [`space`](#space) or [`schema`](#schema) starting from each [`item`](#item) in the given [`sequence`](#sequence). I.e., take each [`item`](#item) in the given [`sequence`](#sequence) as a starting [`item`](#item) for a set of [`subsequences`](#subsequence) with the different [`spaces`](#space) or [`schemas`](#schema). 
 
 Returns [`subsequences`](#subsequences).
 
-#### `subsequencesSequences`
+#### [subsequencesSequences](https://github.com/gottfried-github/fit-in-rows/blob/e4b443aa5bcfd8f6314bba0545a00d26591297e4/src/index.js#L9)
 Out of [`subsequences`](#subsequences), produces sequences of [`subsequence`s](#subsequence) where none of the [`subsequence`s](#subsequence) overlap. 
 
 For each [`subsequence`](#subsequence) in [`subsequences`](#subsequences) iterate over the remaining non-overlapping [`subsequences`](#subsequences). Append each [`subsequence`](#subsequence) to a sequence of [`subsequence`s](#subsequence), formed so far in the recursion.
 
-#### `fillSpace`
+#### [fillSpace](https://github.com/gottfried-github/fit-in-rows/blob/e4b443aa5bcfd8f6314bba0545a00d26591297e4/src/index.js#L111)
 Form a [`subsequence`](#subsequence) by unshifting [`items`](#item) from the given [`sequence`](#sequence) until the given [`space`](#space) is filled in the [`subsequence`](#subsequence) or leave the [`space`](#space) unfilled if no matching [`items`](#item) are present in the [`sequence`](#sequence).
