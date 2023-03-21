@@ -1,11 +1,11 @@
 {
-  "name": "sophos-grid",
+  "name": "fit-in-rows",
   "version": "0.5.2",
-  "main": "src/sophos-grid.js",
+  "main": "src/index.js",
   "repository": "/",
   "author": "spti <dannvx@gmail.com>",
   "license": "MIT",
   "private": false,
-  "description": "lay pictures out such that theres no unfufilled terminal rows",
+  "description": "break a sequence of items into rows in all possible ways",
   "type": "module"
 }
