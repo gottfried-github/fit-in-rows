@@ -3,6 +3,8 @@ Generate all possible ways of breaking a sequence of items into rows of a specif
 
 See live demo [here](https://gottfried-github.github.io/fit-in-rows/demo/dist/index.html).
 
+Build the demo: `npm run watch`
+
 ### Specifying rows
 Items are either wide or narrow. A wide item takes `2` of [`space`](#space); a narrow one takes `1`.
 
