@@ -24,29 +24,35 @@ function subsequencesSequences(sequence, subsequences, subsequencesAll) {
 		
 		let _subsequences = subsequences.slice(1)
 		
+		// skip subsequences to follow that overlap with current subsequence
 		while (overlaps(subsequence, _subsequences[0][0])) {
 			if (_subsequences.length === 1) {
 				sequences.push(_sequence)
+
+				// skip current subsequence, since it overlaps with the subsequences to follow, and generate sequences from the remaining subsequences
 				sequences.push(...subsequencesSequences(sequence, _subsequences, subsequencesAll))
+
 				return
 			}
 
 			_subsequences = _subsequences.slice(1)
 		}
 		
+		// generate sequences from the remaining subsequences
 		sequences.push(...subsequencesSequences(_sequence, _subsequences, subsequencesAll))
 
 		_subsequences = subsequences.slice(1)
 
-		// detect overlapping subsequence
+		// skip current subsequence if overlaps with subsequences to follow
 		while (overlaps(subsequence, _subsequences[0][0])) {      
-			if (_subsequences.length === 1) {			
+			if (_subsequences.length === 1) {
 				sequences.push(...subsequencesSequences(sequence, _subsequences, subsequencesAll))
 				sequences.push(_sequence)
 				
 				return
 			}
 			
+			// generate sequences from the remaining subsequences
 			sequences.push(...subsequencesSequences(sequence, _subsequences, subsequencesAll))
 			
 			_subsequences = _subsequences.slice(1)
