@@ -1,13 +1,15 @@
 ## Description
-Break a sequence of items into rows of specified structure such that the rows are consecutive. Work in progress: the condition that the rows are consecutive is not achieved yet.
+Generate all possible ways of breaking a sequence of items into rows of a specified structure.
 
 ### Specifying rows
 Items are either wide or narrow. A wide item takes `2` of [`space`](#space); a narrow one takes `1`.
 
-The structure of a row is specified by total amount of [`space`](#space) items in it constitute. For example, the [`space`](#space) of `3` says that a row can only contain either three narrow items or one narrow and one wide item - but no more or less than that.
+The structure of a row can be specified in two ways. One way is to specify it by specifying total amount of [`space`](#space) items in the row constitute. For example, the [`space`](#space) of `3` says that a row can only contain either three narrow items or one narrow and one wide item - but no more or less than that.
+
+Another way of specifying the structure of a row is to specify the kind of items to include in a row and the quantity of each specified kind by specifying a set of items with a [`schema`](#schema).
 
 ### Breaking the sequence
-First, I generate `subsequence`s of given [`space`](#space) (representing rows) starting from each `item` in the `sequence` (in `formHomogenousSubsequences`). Then, out of the generated `subsequence`s, I form sequences where none of the `subsequence`s overlap (`cascadeSubsequence`).
+First, I generate `subsequence`s of given [`space`](#space) or [`schema`](#schema) (representing rows) starting from each [`item`](#item) in the [`sequence`](#sequence) (in [`subsequences`](#algorithms)). Then, out of the generated [`subsequences`](#subsequence), I form sequences where none of the [`subsequences`](#subsequence) overlap (in [`subsequencesSequences`](#subsequencesSequences)).
 
 ## Technical overview
 ### Semantics
@@ -15,39 +17,33 @@ First, I generate `subsequence`s of given [`space`](#space) (representing rows) 
 Defined by number of units (e.g., *2* is *two* units of space)
 
 #### Item
-A specification of certain amount of `space`. E.g., `2`. Currently, only `item`s of `1` and `2` `space` are possible: `1` for a narrow item and `2` for a wide one.
+A specification of certain amount of [`space`](#space). E.g., `2`. Currently, only [`items`](#item) of `1` and `2` [`space`](#space) are possible: `1` for a narrow item and `2` for a wide one.
 
 #### Sequence
-A sequence of `items`
+A sequence of [`items`](#item)
 
 #### Subsequence
-A subsequence of a `sequence`
+A subsequence of a [`sequence`](#sequence)
+
+#### Subsequences
+An array of arrays where each array contains [`subsequences`](#subsequence) starting with the same [`item`](#item). The starting [`item`](#item) in each array is subsequent to the starting [`item`](#item) in the previous array.
 
 #### Ref
-A reference to an `item` in a `sequence` by the `item`'s index
+A reference to an [`item`](#item) in a [`sequence`](#sequence) by the [`item's`](#item) index.
 
 #### Schema
-A *set* of `items`. For a `subsequence`, it specifies what `items` and in what quantities a `subsequence` should contain.
-For example, for schema `1,2` and a sequence `1,2, 1,1,1, 2,1`, the following subsequences will be generated:
-`1,2`, `2,1`, `1,2`, `2,1`.
+A *set* of [`items`](#item). It specifies the kind of items which to include in a [`subsequence`](#subsequence) and the quantity of each of the specified kinds. Each specified kind is included once, unless repeated. For example, for a schema of `1,2` and a sequence `1,2, 1,1,1, 2,1`, the following [`subsequences`](#subsequence) will be generated: `1,2`, `2,1`, `1,2`, `2,1`; for a schema of `1,1,1` and the same sequence, the following will be generated: `1,1,1`.
 
 ### Algorithms
-#### formHomogeneousSubsequences
-Form `subsequence`s with given `space` starting from each `item` in the given `sequence`. I.e., take each `item` in the given `sequence` as a starting `item` for a `subsequence` with given `space`. 
+#### `subsequences`
+Form [`subsequences`](#subsequence) with each given [`space`](#space) or [`schema`](#schema) starting from each [`item`](#item) in the given [`sequence`](#sequence). I.e., take each [`item`](#item) in the given [`sequence`](#sequence) as a starting [`item`](#item) for a set of [`subsequences`](#subsequence) with the different [`spaces`](#space) or [`schemas`](#schema). 
 
-The resulting `subsequence`s are ordered subsequently: each next `subsequence`'s first `item` is either subsequent or identical but not precedent to the previous `item` in the given `sequence`.
+Returns [`subsequences`](#subsequences).
 
-#### cascadeSubsequence
-Appends the given `subsequence` to the first sequence of given sequences of `subsequence`s where the `subsequence` doesn't overlap the last `subsequence` in that sequence or to a new empty sequence if all of the previous sequences overlap.
+#### `subsequencesSequences`
+Out of [`subsequences`](#subsequences), produces sequences of [`subsequence`s](#subsequence) where none of the [`subsequence`s](#subsequence) overlap. 
 
-To produce expected results, it is expected that:
-1. the first `item` of the first `subsequence` of each sequence in the given sequences is either subsequent or identical but not precedent in a `sequence` to that in the previous sequence.
-2. each sequence's `subsequence`s are ordered subsequently and without overlap.
+For each [`subsequence`](#subsequence) in [`subsequences`](#subsequences) iterate over the remaining non-overlapping [`subsequences`](#subsequences). Append each [`subsequence`](#subsequence) to a sequence of [`subsequence`s](#subsequence), formed so far in the recursion.
 
-#### negateOverlaps
-Runs `cascadeSubsequence` for each `subsequence` in the given `subsequence`s, accumulating the sequences, produced by it.
-
-To produce expected results, it is expected that the given `subsequence`s are ordered subsequently: that each next `subsequence`'s first `item` is either subsequent or identical but not precedent to the previous `item` in a `sequence`.
-
-#### fillSpace
-Form a `subsequence` by unshifting `item`s from the given `sequence` until the given `space` is filled in the `subsequence` or leave the `space` unfilled if no matching `item`s are present in the `sequence`.
+#### `fillSpace`
+Form a [`subsequence`](#subsequence) by unshifting [`items`](#item) from the given [`sequence`](#sequence) until the given [`space`](#space) is filled in the [`subsequence`](#subsequence) or leave the [`space`](#space) unfilled if no matching [`items`](#item) are present in the [`sequence`](#sequence).

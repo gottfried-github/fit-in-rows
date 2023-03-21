@@ -1,14 +1,11 @@
 {
   "name": "sophos-grid",
-  "version": "0.0.1",
+  "version": "0.5.2",
   "main": "src/sophos-grid.js",
   "repository": "/",
   "author": "spti <dannvx@gmail.com>",
   "license": "MIT",
   "private": false,
   "description": "lay pictures out such that theres no unfufilled terminal rows",
-  "type": "module",
-  "localDependencies": {
-    "recursion-and-discrete-math": "^0.0.2"
-  }
+  "type": "module"
 }
