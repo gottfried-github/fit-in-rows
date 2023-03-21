@@ -1,0 +1,72 @@
+$black-transparent-one: rgb(0,0,0, 0.35);
+$black-transparent-two: rgb(0,0,0, 0.2);
+
+#main {
+    display: flex;
+    flex-direction: column;
+
+    row-gap: 20px;
+}
+
+.sequences-analyzed {
+    display: flex;
+    flex-direction: column;
+
+    row-gap: 100px;
+}
+
+.sequences, .sequence-analyzed {
+    display: flex;
+    flex-direction: column;
+
+    row-gap: 2px;
+}
+
+.item-sequence, .sequence-sequence {
+    display: flex;
+    column-gap: 2px;
+}
+
+.item-sequence.blank {
+    visibility: hidden;
+}
+
+.sequence-sequence {
+    .item-sequence:nth-child(2n+2) .item {
+        background-color: $black-transparent-one;
+    }
+}
+
+.item {
+    flex-shrink: 0;
+    
+    background-color: $black-transparent-two;
+    height: 80px;
+}
+
+.item.narrow {
+    width: 40px;
+}
+
+.item.wide {
+    width: 120px;
+}
+
+.controls-container {
+    > p {
+        margin: 5px 0px;
+    }
+}
+
+.controls {
+    display: flex;
+
+    column-gap: 2px;
+}
+
+.control {
+    flex-shrink: 0;
+
+    border: none;
+    background-color: $black-transparent-two;
+}

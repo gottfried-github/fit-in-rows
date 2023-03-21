@@ -7,5 +7,13 @@
   "license": "MIT",
   "private": false,
   "description": "break a sequence of items into rows in all possible ways",
-  "type": "module"
+  "type": "module",
+  "devDependencies": {
+    "css-loader": "^6.7.3",
+    "mini-css-extract-plugin": "^2.7.5",
+    "sass": "^1.59.3",
+    "sass-loader": "^13.2.1",
+    "webpack": "^5.76.2",
+    "webpack-cli": "^5.0.1"
+  }
 }
