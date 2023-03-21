@@ -5,6 +5,8 @@ See live demo [here](https://gottfried-github.github.io/fit-in-rows/demo/dist/in
 
 Build the demo: `npm run watch`
 
+Generate and process sequences for work with this package [here](https://github.com/gottfried-github/fit-in-rows_sequences).
+
 ### Specifying rows
 Items are either wide or narrow. A wide item takes `2` of [`space`](#space); a narrow one takes `1`.
 
