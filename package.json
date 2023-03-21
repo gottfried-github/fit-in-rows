@@ -1,6 +1,6 @@
 {
   "name": "fit-in-rows",
-  "version": "0.5.2",
+  "version": "0.5.3",
   "main": "src/index.js",
   "repository": "/",
   "author": "spti <dannvx@gmail.com>",
