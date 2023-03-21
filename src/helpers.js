@@ -56,14 +56,13 @@ function overlaps(a, b) {
 * @returns {Boolean} whether at least one `subsequence` is contained between `first` and `last`
 */
 function containsSubsequences(first, last, subsequences) {
-	console.log('containsSubsequences - first, last, subsequences', first, last, subsequences)
 
 	for (const subsequence of subsequences) {
 		if (subsequence[0] <= first) continue
 		if (subsequence[subsequence.length-1] < last) {
-			console.log('containsSubsequences, contains a subsequence', subsequence)
 			return true
 		}
+		
 		return false
 	}
 	
