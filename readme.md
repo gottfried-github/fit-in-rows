@@ -1,6 +1,8 @@
 ## Description
 Generate all possible ways of breaking a sequence of items into rows of a specified structure.
 
+See live demo [here](https://gottfried-github.github.io/fit-in-rows/demo/dist/index.html).
+
 ### Specifying rows
 Items are either wide or narrow. A wide item takes `2` of [`space`](#space); a narrow one takes `1`.
 
